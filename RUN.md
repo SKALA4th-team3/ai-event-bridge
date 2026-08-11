@@ -66,6 +66,25 @@ docker exec -i lecturedb mariadb -umanager -pSqlDba-1 lecture_db < demo-data.sql
 
 ---
 
+## 1-A. 화면만 볼 거라면 — 백엔드 없이 (2분)
+
+발표 리허설이나 화면 리뷰가 목적이면 **1번(도커) 전체를 건너뛰어도 됩니다.**
+
+```bash
+git clone -b feat/frontend-eventbridge https://github.com/kgyujin/ai-event-bridge.git
+cd ai-event-bridge/vue-frontend
+npm ci
+npm run dev
+```
+
+http://localhost:3000 을 열면 **로그인 없이 21개 화면이 다 보입니다.**
+화면 맨 위 미리보기 바에서 골라 열면 되고, 시연 데이터로 채워집니다.
+
+> 저장소가 **Private** 입니다. 받는 분이 collaborator 로 초대되어 있어야 clone 이 됩니다.
+> `.env` 는 없어도 됩니다 — 없으면 실습 기본값(게이트웨이 8080)으로 동작합니다.
+
+---
+
 ## 2. 프론트엔드 띄우기
 
 ```bash
