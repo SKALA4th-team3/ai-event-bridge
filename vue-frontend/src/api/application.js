@@ -11,6 +11,7 @@ export function toApplication(e) {
     userId: e.userId,
     status: e.status,                       // PENDING | ACTIVE | CANCELLED
     appliedAt: e.createdAt,
+    proposal: e.proposal ?? null,
     posting: e.course ? toPosting({ ...e.course, price: e.course.price }) : null
   }
 }
