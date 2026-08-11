@@ -30,13 +30,15 @@ const unread = computed(() => ui.notifications.filter((n) => !n.read).length)
    공고를 찾고 지원하는 메뉴는 업체의 일이라 기관에게는 내리지 않습니다. */
 const NAV = computed(() =>
   isGov.value
-    ? [['Home', '업체 찾기'], ['Guide', '이용 안내']]
+    ? [['Home', '업체 찾기']]
     : [['Home', '공고 찾기'], ['PostingList', '카테고리별'], ['MyApplications', '내 지원'], ['Guide', '이용 안내']]
 )
 const active = (n) => route.name === n || (n === 'PostingList' && route.name === 'PostingDetail')
 
-function signOut() {
-  profile.clear(); auth.logout(false)
+async function signOut() {
+  profile.clear()
+  /* 인증 서버 세션까지 끊고 나서 화면을 옮깁니다 */
+  await auth.logout(false)
   router.push('/login'); ui.toast('로그아웃되었습니다.')
 }
 function pickSeason(s) {

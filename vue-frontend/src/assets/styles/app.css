@@ -1177,3 +1177,6 @@
 .cnav button.sub{margin-top:.5em;padding-top:.6em;border-top:1px solid rgba(255,255,255,.09);
   border-radius:0;color:#8D95A3;font-size:calc(var(--u)*.8)}
 .cnav button.sub:hover{background:none;color:#fff}
+
+/* 콘솔 상단 로그아웃 — 어두운 바 위라 밝은 테두리로 */
+.ctop .cout{margin-left:.55em;padding:.32em .7em;min-height:26px;font-size:calc(var(--u)*.74)}

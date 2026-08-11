@@ -44,10 +44,11 @@ const SCREENS = [
   ['dash',     '기관 · 콘솔 대시보드',           'gov',    () => '/console'],
   ['np1',      '기관 · 공고 등록 ① 기본 정보',    'gov',    () => '/console/postings/new?stage=1'],
   ['np2',      '기관 · 공고 등록 ② 과업·요건',    'gov',    () => '/console/postings/new?stage=2'],
-  ['bidders',  '기관 · 지원 업체 · AI 추천',      'gov',    () => `/console/postings/${topId()}/bidders`],
+  ['bidmodal', '기관 · 지원 업체 선정 모달',      'gov',    () => `/console?open=${topId()}`],
+  ['me-g',     '기관 · 내 정보',                'gov',    () => '/console/me'],
 
-  ['me',       '공통 · 내 정보',                'vendor', () => '/me'],
-  ['help',     '공통 · 이용 안내',              null,     () => '/guide']
+  ['me',       '업체 · 내 정보',                'vendor', () => '/me'],
+  ['help',     '업체 · 이용 안내',              'vendor', () => '/guide']
 ]
 
 const role = computed(() => profile.data?.kind ?? 'vendor')

@@ -18,7 +18,9 @@ export const SORTS = [
 ]
 
 export function emptyFilters() {
-  return { period: null, regions: [], categories: [], budgets: [] }
+  /* text 는 네 축으로 옮길 수 없는 말입니다 — '진해 군항제'처럼
+     이벤트·공고 이름을 그대로 찾을 때 씁니다. */
+  return { period: null, regions: [], categories: [], budgets: [], text: '' }
 }
 
 const bandOf = (n) => BUDGET_BANDS.find((b) => b.test(n))?.code ?? 'd'
@@ -39,6 +41,10 @@ export function applyFilters(postings, f) {
     if (f.regions.length && !f.regions.includes(p.region)) return false
     if (f.categories.length && !f.categories.includes(p.category)) return false
     if (f.budgets.length && !f.budgets.includes(bandOf(p.budget))) return false
+    if (f.text) {
+      const hay = `${p.eventName} ${p.name} ${p.location} ${p.orgName}`.toLowerCase()
+      if (!hay.includes(f.text.toLowerCase())) return false
+    }
     return true
   })
 }
