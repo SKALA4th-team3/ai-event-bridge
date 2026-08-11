@@ -27,8 +27,10 @@ function periodPass(p, period) {
   if (!period) return true
   if (p.dday === null) return false
   if (period === '이번 주 마감') return p.dday <= 7
-  if (period === '이번 달') return p.dday <= 20
-  return p.dday > 10
+  if (period === '이번 달') return p.dday <= 31
+  /* '다음 달'이 dday > 10 이면 내년 축제까지 딸려 옵니다.
+     칩에 적힌 말과 걸러지는 범위가 같아야 합니다. */
+  return p.dday > 31 && p.dday <= 62
 }
 
 export function applyFilters(postings, f) {

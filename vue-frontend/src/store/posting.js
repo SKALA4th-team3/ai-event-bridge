@@ -50,6 +50,8 @@ export const usePostingStore = defineStore('posting', () => {
   /* 기관 콘솔이 다루는 공고 목록.
      데모 계정으로는 내가 올린 공고를 특정하기 어려워, 없으면 전체를 씁니다. */
   const consoleRows = computed(() => (mine.value.length ? mine.value : scored.value))
+  /* 위 폴백이 동작했는지 — 화면이 '내 공고'라고 잘라 말하지 않도록 알려 줍니다 */
+  const consoleIsAll = computed(() => !mine.value.length)
 
   function resetFilters() { filters.value = emptyFilters() }
   function toggle(axis, value) {
@@ -62,6 +64,6 @@ export const usePostingStore = defineStore('posting', () => {
   /* 401은 '공고가 없음'이 아니라 '로그인이 안 됨'입니다. 화면에서 구분해 보여줍니다. */
   const needsLogin = computed(() => error.value?.response?.status === 401)
 
-  return { all, scored, filtered, grouped, loading, error, needsLogin, usingDemo, filters, sort, consoleRows,
+  return { all, scored, filtered, grouped, loading, error, needsLogin, usingDemo, filters, sort, consoleRows, consoleIsAll,
            openCount, dueSoonCount, mine, load, byId, resetFilters, toggle }
 })

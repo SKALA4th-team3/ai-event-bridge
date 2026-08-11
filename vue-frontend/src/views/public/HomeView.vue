@@ -12,6 +12,7 @@ import { useProfileStore } from '@/store/profile.js'
 import { useSeasonStore } from '@/store/season.js'
 import { useUiStore } from '@/store/ui.js'
 import { DEMO_BIDDERS } from '@/constants/demoBidders.js'
+import { onEscape } from '@/composables/useEscape.js'
 
 const router = useRouter()
 const posting = usePostingStore()
@@ -28,10 +29,15 @@ onMounted(async () => {
   if (!isGov.value) application.load()
 })
 
-/* 시즌은 색이면서 조회 기간입니다 */
+/* 시즌은 색이면서 조회 기간입니다 — 단, '언제 열리는 축제인가'이지
+   '언제까지 지원해야 하는가'가 아닙니다. 8월에 여름 시즌을 보면
+   올여름 축제는 이미 끝나 내년 것만 남습니다.
+   그래서 시즌으로 거르는 건 시즌이라고 적어 둔 자리(지도, '○○ 시즌' 지표)뿐이고,
+   마감·추천처럼 '지금 지원할 수 있는가'를 말하는 자리는 전체를 봅니다. */
 const inSeason = computed(() => season.inSeason(posting.scored))
+const live = computed(() => posting.scored.filter((p) => p.dday !== null))
 const openCount = computed(() => inSeason.value.filter((p) => p.dday !== null).length)
-const soonCount = computed(() => inSeason.value.filter((p) => p.dday !== null && p.dday <= 7).length)
+const soonCount = computed(() => live.value.filter((p) => p.dday <= 7).length)
 const orgCount = computed(() => new Set(posting.scored.map((p) => p.orgName)).size)
 
 /* ── 검색: 문장 → 조건 칩 ───────────────────────────────── */
@@ -66,16 +72,15 @@ const TABS = [
 ]
 const tab = ref('fit')
 
-const recommended = computed(() => recommendFor(inSeason.value, firm.value, 8))
+const recommended = computed(() => recommendFor(live.value, firm.value, 8))
 const closingSoon = computed(() =>
-  inSeason.value.filter((p) => p.dday !== null).sort((a, b) => a.dday - b.dday).slice(0, 8))
+  [...live.value].sort((a, b) => a.dday - b.dday).slice(0, 8))
 /* 등록순 대용 — id가 클수록 최근에 올라온 공고입니다 */
 const newest = computed(() =>
-  [...inSeason.value].sort((a, b) => Number(b.id) - Number(a.id)).slice(0, 8))
+  [...live.value].sort((a, b) => Number(b.id) - Number(a.id)).slice(0, 8))
 
 const picks = computed(() =>
   tab.value === 'soon' ? closingSoon.value : tab.value === 'new' ? newest.value : recommended.value)
-const urgentN = computed(() => picks.value.filter((p) => p.dday !== null && p.dday <= 7).length)
 const th = (i) => 'abcd'.charAt(i % 4)
 
 /* 히어로 지표 — 세 장 중 가운데를 띄워 시선을 모읍니다.
@@ -88,7 +93,7 @@ const ICON = {
 }
 const myField = computed(() => firm.value?.category ?? null)
 const myCount = computed(() =>
-  myField.value ? inSeason.value.filter((p) => p.category === myField.value).length : 0)
+  myField.value ? live.value.filter((p) => p.category === myField.value).length : 0)
 
 function goList(patch = {}) {
   posting.resetFilters()
@@ -187,6 +192,9 @@ const myOpen = computed(() => {
 })
 const myBids = computed(() => posting.consoleRows.reduce((s, p) => s + p.bidderCount, 0))
 const open = (p) => router.push(`/postings/${p.id}`)
+
+/* Esc 로 닫습니다 */
+onEscape(() => { firm2.value = null })
 </script>
 
 <template>
@@ -194,7 +202,8 @@ const open = (p) => router.push(`/postings/${p.id}`)
     <div class="hero">
       <div class="hero-l">
         <span class="kicker">{{ kicker }}</span>
-        <h1 v-if="!isGov">이번 주 마감 <em>{{ urgentN }}건</em>, 확인하셨나요</h1>
+        <h1 v-if="!isGov && soonCount">이번 주 마감 <em>{{ soonCount }}건</em>, 확인하셨나요</h1>
+        <h1 v-else-if="!isGov">지금 지원할 수 있는 공고 <em>{{ live.length }}건</em></h1>
         <h1 v-else>공고를 등록하고 <em>업체</em>를 찾으세요</h1>
         <p class="sub">{{ sub }}</p>
 
@@ -345,8 +354,8 @@ const open = (p) => router.push(`/postings/${p.id}`)
         </div>
 
         <template v-if="pages.length > 1">
-          <button class="cnav prev" aria-label="이전" @click="goManual(-1)">‹</button>
-          <button class="cnav next" aria-label="다음" @click="goManual(1)">›</button>
+          <button class="carrow prev" aria-label="이전" @click="goManual(-1)">‹</button>
+          <button class="carrow next" aria-label="다음" @click="goManual(1)">›</button>
           <div class="cdots" role="tablist" aria-label="공고 묶음">
             <button v-for="(pg, i) in pages" :key="i" role="tab" :aria-selected="i === page"
                     :aria-label="`${i + 1}번째 묶음`" :class="{ on: i === page }" @click="jump(i)" />
@@ -362,7 +371,7 @@ const open = (p) => router.push(`/postings/${p.id}`)
     </div>
 
     <!-- 업체 검토 의견 -->
-    <div v-if="firm2" class="ovl" @click.self="firm2 = null">
+    <div v-if="firm2" class="ovl" role="dialog" aria-modal="true" @click.self="firm2 = null">
       <div class="ovlcard" style="text-align:left">
         <h3 style="text-align:center">{{ firm2.name }}</h3>
         <p class="p" style="text-align:center">{{ firm2.loc }} · {{ firm2.category }} · 수행 {{ firm2.records }}건</p>
@@ -403,7 +412,7 @@ const open = (p) => router.push(`/postings/${p.id}`)
       <span class="barstats">
         <span class="barstat"><span class="n">{{ application.reviewing }}</span><span class="l">심사 중</span></span>
         <span class="barstat"><span class="n">{{ application.selected }}</span><span class="l">선정</span></span>
-        <span class="barstat alert"><span class="n">{{ urgentN }}</span><span class="l">마감 임박</span></span>
+        <span class="barstat"><span class="n">{{ application.notSelected }}</span><span class="l">미선정</span></span>
       </span>
       <span class="acts"><button class="btn pri" @click="router.push('/applications')">내 지원 관리 →</button></span>
     </div>

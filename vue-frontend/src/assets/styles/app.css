@@ -818,13 +818,13 @@
 .cpage[aria-hidden="true"]{visibility:hidden}
 
 /* 좌우 버튼 — 카드 바깥 여백에 얹습니다 */
-.cnav{position:absolute;top:calc(50% - 1.1em);z-index:2;width:2.2em;height:2.2em;
+.carrow{position:absolute;top:calc(50% - 1.1em);z-index:2;width:2.2em;height:2.2em;
   display:grid;place-items:center;border:1px solid var(--line);border-radius:50%;
   background:var(--bg2);color:var(--tx2);font-size:calc(var(--u)*1.05);line-height:1;
   cursor:pointer;box-shadow:var(--shadow);
   transition:color var(--quick) var(--ease),border-color var(--quick) ease,transform .14s ease}
-.cnav:hover{color:var(--brand);border-color:var(--brand-bd);transform:scale(1.06)}
-.cnav.prev{left:-1.05em} .cnav.next{right:-1.05em}
+.carrow:hover{color:var(--brand);border-color:var(--brand-bd);transform:scale(1.06)}
+.carrow.prev{left:-1.05em} .carrow.next{right:-1.05em}
 
 .cdots{display:flex;justify-content:center;gap:.36em;margin-top:.7em}
 .cdots button{width:.5em;height:.5em;padding:0;border:none;border-radius:99px;
@@ -1033,3 +1033,36 @@
 @media (max-width:1200px){ .cpage{grid-template-columns:repeat(3,1fr)} }
 @media (max-width:900px){ .cpage{grid-template-columns:repeat(2,1fr)} .tr-list{grid-template-columns:repeat(3,1fr)} }
 @media (max-width:640px){ .cpage{grid-template-columns:1fr} .tr-list{grid-template-columns:repeat(2,1fr)} }
+
+/* ── 누를 수 있는 것은 최소 24px ──────────────────────────────
+   보이는 크기는 그대로 두고 눌리는 영역만 넓힙니다.
+   점 하나가 8×8 이면 마우스로도 자주 빗나갑니다. */
+.cdots button{position:relative}
+.cdots button::after{content:"";position:absolute;left:50%;top:50%;
+  width:26px;height:26px;transform:translate(-50%,-50%)}
+.gnb .bell{min-width:28px;min-height:28px;display:inline-grid;place-items:center}
+.gnb .who{min-height:28px;display:inline-flex;align-items:center;padding:0 .2em}
+.rowact .btn,.rail-reset,.sum .btn,.act button{min-height:26px}
+.rowact .btn{min-width:44px;font-size:.74em}
+.rail-reset{display:flex;align-items:center}
+.ec-save,.ehero .save,.pdel{min-width:26px;min-height:26px}
+
+/* ── 상세: 같은 이벤트의 다른 공사 ─────────────────────── */
+.panel h3 .cnt{margin-left:.4em;font-size:.8em;color:var(--brand);font-weight:800}
+.sibs{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:.4em}
+.sib{display:grid;grid-template-columns:1fr auto auto auto auto;align-items:center;gap:.9em;
+  width:100%;padding:.6em .8em;min-height:26px;text-align:left;cursor:pointer;
+  background:var(--surf2);border:1px solid var(--line);border-radius:.6em;
+  transition:border-color var(--quick) var(--ease),transform var(--quick) var(--ease)}
+.sib:hover{border-color:var(--brand);transform:translateX(2px)}
+.sb-n{font-size:.82em;font-weight:700;color:var(--tx1);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sb-c{font-size:.72em;color:var(--tx3)}
+.sb-b{font-size:.76em;font-weight:700;color:var(--tx2);font-variant-numeric:tabular-nums}
+.sb-d{font-size:.74em;font-weight:700;color:var(--tx3);font-variant-numeric:tabular-nums}
+.sb-d.urgent{color:var(--brand)}
+.sb-f{font-size:.72em;font-weight:700;color:var(--acc)}
+
+/* 나머지 작은 클릭 대상 — 보이는 크기는 그대로, 눌리는 높이만 맞춥니다 */
+.crumb button,.cback button,.linkbtn{min-height:26px;display:inline-flex;align-items:center}
+.ctop .bell{min-width:26px;min-height:26px;display:inline-grid;place-items:center}
+.eye{min-width:26px;min-height:26px;display:grid;place-items:center}
