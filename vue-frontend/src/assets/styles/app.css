@@ -1021,3 +1021,15 @@
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tr-f{display:flex;align-items:center;gap:.35em}
 .tr-f i{font-style:normal;font-family:var(--f-mono);font-size:calc(var(--u)*.68);font-weight:700;color:var(--sec)}
+
+/* ── 화면 크기에 맞는 사진 ────────────────────────────────────
+   배경이미지로는 화면 크기별로 다른 파일을 고를 수 없어 <img srcset> 을 씁니다.
+   그림자·배지 같은 겹침 요소가 위에 오도록 사진은 맨 아래에 깝니다. */
+.ec-th,.hc-th,.ehero .th,.tr-th{position:relative;overflow:hidden}
+.ph{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;display:block}
+.ec-th::after,.hc-th::after,.ehero .th::after{z-index:1}
+
+/* 카드 캐러셀도 좁은 화면에서 줄어듭니다 */
+@media (max-width:1200px){ .cpage{grid-template-columns:repeat(3,1fr)} }
+@media (max-width:900px){ .cpage{grid-template-columns:repeat(2,1fr)} .tr-list{grid-template-columns:repeat(3,1fr)} }
+@media (max-width:640px){ .cpage{grid-template-columns:1fr} .tr-list{grid-template-columns:repeat(2,1fr)} }

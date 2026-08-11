@@ -274,7 +274,10 @@ const open = (p) => router.push(`/postings/${p.id}`)
               <template v-if="!isGov">
         <article v-for="(p, i) in pg" :key="p.id" class="hcard">
                   <button class="ec-hit" :aria-label="`${p.eventName} ${p.name} 상세 보기`" @click="open(p)" />
-                  <span class="hc-th" :class="th(i)" :style="p.photo ? { backgroundImage: `url(${p.photo})` } : null" />
+                  <span class="hc-th" :class="th(i)">
+                    <img v-if="p.photo" class="ph" :src="p.photo.src" :srcset="p.photo.srcset"
+                         sizes="120px" :alt="`${p.eventName} 사진`" loading="lazy" decoding="async">
+                  </span>
                   <span class="hc-body">
                     <span class="hc-top">
                       <span class="hc-name">{{ p.eventName }}</span>

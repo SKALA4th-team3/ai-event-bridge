@@ -143,8 +143,10 @@ const openWork = (w) => router.push(`/postings/${w.id}`)
           </div>
           <div class="tr-list">
             <button v-for="(t, i) in topPicks" :key="t.id" class="trcard" @click="isGov ? null : openWork(t)">
-              <span class="tr-th" :class="`th${(i % 4) + 1}`"
-                    :style="!isGov && t.photo ? { backgroundImage: `url(${t.photo})` } : null" />
+              <span class="tr-th" :class="`th${(i % 4) + 1}`">
+                <img v-if="!isGov && t.photo" class="ph" :src="t.photo.src" :srcset="t.photo.srcset"
+                     sizes="64px" :alt="`${t.eventName} 사진`" loading="lazy" decoding="async">
+              </span>
               <span class="tr-b">
                 <b>{{ isGov ? t.name : t.eventName }}</b>
                 <em>{{ isGov ? `${t.loc} · ${t.category}` : `${t.location} · ${t.name}` }}</em>
@@ -162,7 +164,10 @@ const openWork = (w) => router.push(`/postings/${w.id}`)
           <button class="backlink" @click="back">← 전체 이벤트</button>
 
           <div class="ehero">
-            <span class="th" :class="current.thumb" :style="current.photo ? { backgroundImage: `url(${current.photo})` } : null" />
+            <span class="th" :class="current.thumb">
+              <img v-if="current.photo" class="ph" :src="current.photo.src" :srcset="current.photo.srcset"
+                   sizes="140px" :alt="`${current.name} 사진`" decoding="async">
+            </span>
             <span class="t">
               <b>{{ current.name }}</b>
               <span class="sub">
@@ -234,7 +239,10 @@ const openWork = (w) => router.push(`/postings/${w.id}`)
             <!-- 카드 전체를 누르는 판. 관심 버튼만 이 위에 얹힙니다 -->
             <button class="ec-hit" :aria-label="`${e.name} — 공사 ${e.works.length}건 보기`" @click="open(e)" />
 
-            <div class="ec-th" :class="e.thumb" :style="e.photo ? { backgroundImage: `url(${e.photo})` } : null">
+            <div class="ec-th" :class="e.thumb">
+              <img v-if="e.photo" class="ph" :src="e.photo.src" :srcset="e.photo.srcset"
+                   sizes="(max-width: 1100px) 46vw, 23vw"
+                   :alt="`${e.name} 사진`" loading="lazy" decoding="async">
               <span class="ec-tag" :class="{ urgent: isUrgent(e.dday) }">
                 <i />{{ e.dday === null ? '심사 중' : isUrgent(e.dday) ? `마감 ${ddayLabel(e.dday)}` : '지원 접수' }}
               </span>

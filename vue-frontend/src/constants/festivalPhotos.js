@@ -1,7 +1,10 @@
 /* 축제 사진 — 위키미디어 공용의 자유 라이선스 사진입니다.
-   · 원본을 가로 720px · 품질 72 로 줄여 담았습니다 (표시 최대폭이 300px 라 충분합니다)
-   · 저작자·라이선스는 constants/photoCredits.js 에 있고 이용 안내 화면에 표기합니다
-   · 사진이 없는 축제는 계절 그라데이션으로 대체됩니다 */
+   화면 크기에 맞는 판을 브라우저가 고르도록 두 가지를 준비합니다.
+     · 720px — 목록 카드처럼 크게 쓰는 자리, 레티나 2배까지 감당
+     ·  360px — 좁은 화면이나 작은 썸네일
+   실제 선택은 <img srcset/sizes> 가 하고, 그래서 배경이미지가 아니라
+   <img> 를 씁니다. 배경이미지로는 화면 크기에 따라 다른 파일을 못 고릅니다.
+   사진이 없는 축제는 null 이며 계절 그라데이션으로 대체됩니다. */
 const MAP = {
   '진해 군항제': 'jinhae',
   '여의도 봄꽃축제': 'yeouido',
@@ -17,5 +20,12 @@ const MAP = {
   '이천 쌀문화축제': 'icheon',
   '대전 사이언스페스티벌': 'daejeon'
 }
-export const photoOf = (eventName) =>
-  MAP[eventName] ? `/festivals/${MAP[eventName]}.jpg` : null
+
+export const photoOf = (eventName) => {
+  const slug = MAP[eventName]
+  if (!slug) return null
+  return {
+    src: `/festivals/${slug}.jpg`,
+    srcset: `/festivals/sm/${slug}.jpg 360w, /festivals/${slug}.jpg 720w`
+  }
+}
