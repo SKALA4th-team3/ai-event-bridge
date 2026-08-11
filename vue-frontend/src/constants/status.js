@@ -21,6 +21,11 @@ export const BID_STATUS_MAP = {
   CANCELLED: 'NOT_AWARDED'
 }
 
+export const normalizeBidStatus = (status) => BID_STATUS_MAP[status] ?? status
+export const isReviewingBid = (status) => ['SUBMITTED', 'UNDER_REVIEW'].includes(normalizeBidStatus(status))
+export const isSelectedBid = (status) => normalizeBidStatus(status) === 'AWARDED'
+export const isNotSelectedBid = (status) => normalizeBidStatus(status) === 'NOT_AWARDED'
+
 export const BID_STATUS = {
   SUBMITTED:    { label: '접수 완료', tone: 'sec' },
   UNDER_REVIEW: { label: '심사 중',   tone: 'wait' },
@@ -30,7 +35,7 @@ export const BID_STATUS = {
 }
 
 export const bidStatus = (backendStatus) =>
-  BID_STATUS[BID_STATUS_MAP[backendStatus] ?? backendStatus] ?? { label: backendStatus, tone: '' }
+  BID_STATUS[normalizeBidStatus(backendStatus)] ?? { label: backendStatus, tone: '' }
 
 /** 공고 상태 — 마감일로 판정합니다 (백엔드에 상태 컬럼이 없습니다) */
 export const NOTICE_STATUS = {
