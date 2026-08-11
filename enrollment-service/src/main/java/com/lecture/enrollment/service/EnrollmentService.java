@@ -148,6 +148,12 @@ public class EnrollmentService {
                 .collect(Collectors.toList());
     }
 
+    public List<EnrollmentDto.EnrollmentResponse> getEnrollmentsByCourse(Long courseId) {
+        return enrollmentRepository.findByCourseId(courseId).stream()
+                .map(EnrollmentDto.EnrollmentResponse::from)
+                .collect(Collectors.toList());
+    }
+
     /**
      * 수강 이력 조회 - 추천 서비스용
      */

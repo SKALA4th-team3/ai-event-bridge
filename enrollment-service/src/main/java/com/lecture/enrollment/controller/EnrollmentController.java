@@ -57,6 +57,12 @@ public class EnrollmentController {
         return ResponseEntity.ok(EnrollmentDto.ApiResponse.success(response));
     }
 
+    @GetMapping("/courses/{courseId}")
+    public ResponseEntity<EnrollmentDto.ApiResponse<List<EnrollmentDto.EnrollmentResponse>>> getCourseEnrollments(
+            @PathVariable Long courseId) {
+        return ResponseEntity.ok(EnrollmentDto.ApiResponse.success(enrollmentService.getEnrollmentsByCourse(courseId)));
+    }
+
     @GetMapping("/{enrollmentId}")
     public ResponseEntity<EnrollmentDto.ApiResponse<EnrollmentDto.EnrollmentResponse>> getEnrollment(
             @PathVariable Long enrollmentId, @RequestHeader("X-User-Id") Long userId) {

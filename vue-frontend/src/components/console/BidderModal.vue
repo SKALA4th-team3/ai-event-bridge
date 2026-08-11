@@ -1,8 +1,9 @@
 <script setup>
 import { ref, computed, watch } from 'vue'
-import { biddersFor } from '@/constants/demoBidders.js'
 import { wonShort, ddayLabel, isUrgent } from '@/composables/useFormat.js'
 import { onEscape } from '@/composables/useEscape.js'
+import api from '@/api/index.js'
+import { applicationApi } from '@/api/application.js'
 
 /* 공고 하나를 놓고 지원 업체를 견주어 한 곳을 고르는 화면입니다.
 
@@ -28,11 +29,46 @@ const SORTS = [
 const sort = ref('fit')
 
 const all = ref([])
-watch(() => props.posting, (p) => {
-  /* ★ 공고별 지원 업체 조회 API가 없어 시연 명단을 씁니다.
-       findByCourseId 가 추가되면 이 줄만 API 호출로 바꾸면 됩니다. */
-  all.value = p ? biddersFor(p) : []
+watch(() => props.posting, async (p) => {
+  all.value = []
   sort.value = 'fit'
+  if (!p) return
+  try {
+    const applications = await applicationApi.byCourse(p.id)
+    all.value = await Promise.all(applications.map(async (application) => {
+      try {
+        const response = await api.get(`/api/users/${application.userId}`)
+        const user = response.data?.data ?? response.data
+        return {
+          id: application.id,
+          name: user.name,
+          loc: user.email,
+          category: '지원 업체',
+          records: null,
+          tenure: null,
+          fit: null,
+          status: '검토',
+          why: application.proposal ? `제안서: ${application.proposal}` : '제안서 정보 없음',
+          reasons: [`지원 금액 ${wonShort(application.bidAmount)}`]
+        }
+      } catch {
+        return {
+          id: application.id,
+          name: `업체 #${application.userId}`,
+          loc: '',
+          category: '지원 업체',
+          records: null,
+          tenure: null,
+          fit: null,
+          status: '검토',
+          why: application.proposal ? `제안서: ${application.proposal}` : '제안서 정보 없음',
+          reasons: [`지원 금액 ${wonShort(application.bidAmount)}`]
+        }
+      }
+    }))
+  } catch {
+    all.value = []
+  }
 }, { immediate: true })
 
 const sorted = computed(() => {
@@ -91,8 +127,7 @@ onEscape(() => { if (props.posting) emit('close') })
         <!-- ① AI 1순위 -->
         <section v-if="top" class="bs-sec">
           <h4 class="bs-lb">
-            <span class="mk">✦</span>{{ winner ? '선정한 업체' : 'AI 1순위' }}
-            <em v-if="!winner">적합도 기준 · 정렬을 바꿔도 추천은 그대로입니다</em>
+            <span class="mk">✦</span>{{ winner ? '선정한 업체' : '지원 업체' }}
           </h4>
           <article class="topcard" :class="{ won: top.status === '선정' }">
             <div class="tc-l">
@@ -101,13 +136,13 @@ onEscape(() => { if (props.posting) emit('close') })
                 <b>{{ top.name }}</b>
                 <em>{{ top.loc }} · {{ top.category }}</em>
                 <span class="tc-tags">
-                  <span class="tg">수행 {{ top.records }}건</span>
-                  <span class="tg">업력 {{ top.tenure }}년</span>
+                  <span v-if="top.records != null" class="tg">수행 {{ top.records }}건</span>
+                  <span v-if="top.tenure != null" class="tg">업력 {{ top.tenure }}년</span>
                 </span>
               </div>
             </div>
 
-            <div class="tc-m">
+            <div v-if="top.fit != null" class="tc-m">
               <div class="tc-fit">
                 <span class="n">{{ top.fit }}<i>%</i></span>
                 <span class="l">적합도</span>
@@ -129,7 +164,7 @@ onEscape(() => { if (props.posting) emit('close') })
 
         <!-- ② 나머지 후보 -->
         <section v-if="rest.length" class="bs-sec">
-          <h4 class="bs-lb">다른 후보 <span class="cnt">{{ rest.length }}</span></h4>
+          <h4 class="bs-lb">다른 지원 업체 <span class="cnt">{{ rest.length }}</span></h4>
           <div class="bidgrid">
             <article v-for="b in rest" :key="b.id" class="bcard">
               <span class="bc-h">
@@ -137,11 +172,11 @@ onEscape(() => { if (props.posting) emit('close') })
                 <span class="bc-id"><b>{{ b.name }}</b><em>{{ b.loc }} · {{ b.category }}</em></span>
               </span>
               <dl class="bc-kv">
-                <div><dt>적합도</dt><dd class="strong">{{ b.fit }}%</dd></div>
-                <div><dt>수행</dt><dd>{{ b.records }}건</dd></div>
-                <div><dt>업력</dt><dd>{{ b.tenure }}년</dd></div>
+                <div v-if="b.fit != null"><dt>적합도</dt><dd class="strong">{{ b.fit }}%</dd></div>
+                <div><dt>수행</dt><dd>{{ b.records != null ? `${b.records}건` : '미등록' }}</dd></div>
+                <div><dt>업력</dt><dd>{{ b.tenure != null ? `${b.tenure}년` : '미등록' }}</dd></div>
               </dl>
-              <span class="bar"><i :style="{ width: b.fit + '%' }" /></span>
+              <span v-if="b.fit != null" class="bar"><i :style="{ width: b.fit + '%' }" /></span>
               <button class="btn sec bc-go" @click="award(b)">
                 {{ winner ? '이 업체로 변경' : '선정' }}
               </button>
