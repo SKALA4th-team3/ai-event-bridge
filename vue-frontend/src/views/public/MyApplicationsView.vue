@@ -105,7 +105,8 @@ onEscape(() => { editing.value = null; canceling.value = null })
       <div class="atable">
         <template v-if="rows.length">
           <div class="arow hd">
-            <span>공고</span><span>발주 기관</span><span>예산</span><span>지원일 · 마감</span><span>제출 서류</span><span>상태</span><span></span>
+            <span>공고</span><span>발주 기관</span><span style="text-align:right">예산</span>
+            <span>지원일 · 마감</span><span>제출 서류</span><span>상태</span><span></span>
           </div>
           <div v-for="a in rows" :key="a.id" class="arow" :style="a.status === 'CANCELLED' ? 'opacity:.6' : ''">
             <span class="anm">
