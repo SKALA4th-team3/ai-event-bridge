@@ -1,0 +1,79 @@
+.forecast-axis-text {
+  fill: #64748b;
+  font-weight: 800;
+}
+
+.forecast-zone {
+  fill: #eff6ff;
+  opacity: 0.65;
+}
+
+.svg-tooltip rect {
+  fill: #172033;
+  opacity: 0.96;
+  filter: drop-shadow(0 3px 6px rgba(15, 23, 42, 0.25));
+}
+
+.svg-tooltip text {
+  fill: #fff;
+}
+
+.tooltip-title {
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.tooltip-value {
+  font-size: 11px;
+}
+
+.trend-legend {
+  height: 0 !important;
+  border-top: 2px dashed #d97706;
+  border-radius: 0 !important;
+}
+
+.forecast-legend {
+  background: #eff6ff !important;
+  border: 1px solid #93c5fd;
+}
+
+.regression-note {
+  margin-top: 4px;
+  color: #667085;
+  font-size: 12px;
+}
+
+.unified-panel { margin-bottom: 8px; }
+.unified-chart svg { min-width: 900px; }
+.performance-legend { display:flex; justify-content:flex-end; flex-wrap:wrap; gap:15px; margin:8px 0 3px; color:#667085; font-size:12px; }
+.performance-legend span { display:flex; align-items:center; gap:6px; }
+.performance-legend i { display:inline-block; width:18px; }
+.legend-line { height:3px; border-radius:2px; }
+.legend-line.visitors { background:#2563eb; }
+.legend-line.cost { background:#0f766e; }
+.legend-line.regression { height:0; border-top:2px dashed #64748b; }
+.legend-shape { width:10px !important; height:10px; background:#64748b; }
+.legend-shape.total-cost { transform:rotate(45deg); }
+.legend-shape.expected-profit { border-radius:50%; }
+.company-legend { display:flex; justify-content:flex-end; flex-wrap:wrap; gap:9px 16px; margin:8px 0 2px; color:#475569; font-size:12px; }
+.company-legend span { display:flex; align-items:center; gap:6px; }
+.company-legend i { width:9px; height:9px; border-radius:50%; box-shadow:0 0 0 2px #fff,0 0 0 3px #e2e8f0; }
+.axis-title { font-size:12px; font-weight:800; fill:#64748b; }
+.visitor-axis { fill:#64748b; }
+.money-axis { fill:#64748b; }
+.unified-chart .axis-text { fill:#64748b; }
+.unified-chart .grid-line { stroke:#e7eaf0; stroke-width:1; }
+.bid-points { cursor:pointer; }
+
+.form-grid {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+@media (max-width: 900px) {
+  .form-grid { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 560px) {
+  .form-grid { grid-template-columns: 1fr; }
+}
