@@ -35,8 +35,10 @@ const NAV = computed(() =>
 )
 const active = (n) => route.name === n || (n === 'PostingList' && route.name === 'PostingDetail')
 
-function signOut() {
-  profile.clear(); auth.logout(false)
+async function signOut() {
+  profile.clear()
+  /* 인증 서버 세션까지 끊고 나서 화면을 옮깁니다 */
+  await auth.logout(false)
   router.push('/login'); ui.toast('로그아웃되었습니다.')
 }
 function pickSeason(s) {
