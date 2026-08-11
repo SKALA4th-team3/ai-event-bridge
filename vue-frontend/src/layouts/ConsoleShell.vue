@@ -11,7 +11,12 @@ const route = useRoute()
 const profile = useProfileStore()
 const ui = useUiStore()
 
-const TITLES = { Dashboard: '대시보드', PostingCreate: '공고 등록', ConsoleProfile: '내 정보' }
+const TITLES = {
+  Dashboard: '대시보드',
+  PostingCreate: '공고 등록',
+  ConsoleProfile: '내 정보',
+  ConsoleKnowledge: 'AI 활용 데이터 자산 현황'
+}
 const title = computed(() => TITLES[route.name] ?? '발주 콘솔')
 const org = computed(() => ({
   name: profile.org?.name || '발주 기관',
@@ -43,6 +48,9 @@ async function signOut() {
           <button :class="{ on: route.name === 'PostingCreate' }" @click="router.push('/console/postings/new')">공고 등록</button>
           <button :class="{ on: route.name === 'ConsoleProfile' }" @click="router.push('/console/me')">
             내 정보
+          </button>
+          <button :class="{ on: route.name === 'ConsoleKnowledge' }" @click="router.push('/console/knowledge')">
+            AI 활용 데이터 자산 현황
           </button>
         </nav>
       </aside>
