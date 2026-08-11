@@ -30,7 +30,7 @@ export const useApplicationStore = defineStore('application', () => {
     finally { loading.value = false }
   }
 
-  /** 지원 → PENDING. 확정(ACTIVE)은 Kafka 왕복 후라 폴링으로 확인합니다. */
+  /** 지원은 Enrollment로 저장되며, 화면 용어는 apply를 유지합니다. */
   async function apply(postingId, bidAmount = null, proposal = null) {
     /* 미리보기에서는 서버에 접수하지 않고 화면 흐름만 재현합니다 */
     if (offlinePreview()) {
@@ -39,10 +39,10 @@ export const useApplicationStore = defineStore('application', () => {
       list.value.unshift(fake)
       return fake
     }
-    /* bidAmount·proposal 은 백엔드에 받을 자리가 없어 아직 전송되지 않습니다.
-       enrollments 에 bid_amount 컬럼과 제안서 업로드 엔드포인트가 생기면
-       applicationApi.apply 에서 함께 보내면 됩니다. */
-    const created = { ...(await applicationApi.apply(postingId)), bidAmount, proposal: proposal?.name ?? null }
+    const created = await applicationApi.apply(postingId, {
+      bidAmount,
+      proposal: proposal?.name ?? proposal
+    })
     list.value.unshift(created)
     return created
   }

@@ -35,6 +35,11 @@ public class EnrollmentService {
      * 4. 결제 요청
      */
     public EnrollmentDto.EnrollmentResponse enroll(Long userId, Long courseId) {
+        return apply(userId, courseId, null, null);
+    }
+
+    @Transactional
+    public EnrollmentDto.EnrollmentResponse apply(Long userId, Long courseId, BigDecimal bidAmount, String proposal) {
         if (!courseServiceClient.existsCourse(courseId)) {
             throw new IllegalArgumentException("존재하지 않는 강의입니다: " + courseId);
         }
@@ -43,12 +48,42 @@ public class EnrollmentService {
             throw new IllegalArgumentException("이미 수강신청한 강의입니다");
         }
 
-        Enrollment enrollment = enrollmentWriteService.createPendingEnrollment(userId, courseId);
+        Map<String, Object> course = courseServiceClient.getCourse(courseId);
+        if (!"OPEN".equals(course.get("status"))) {
+            throw new IllegalStateException("OPEN 상태의 공고에만 지원할 수 있습니다.");
+        }
 
-        paymentServiceClient.requestPayment(userId, courseId, BigDecimal.valueOf(99000));
+        Enrollment enrollment = enrollmentWriteService.createPendingEnrollment(userId, courseId, bidAmount, proposal);
 
         log.info("[EnrollmentService] 수강신청 완료 (결제 대기) - enrollmentId: {}", enrollment.getId());
         return EnrollmentDto.EnrollmentResponse.from(enrollment);
+    }
+
+    public EnrollmentDto.EnrollmentResponse getEnrollment(Long enrollmentId, Long userId) {
+        Enrollment enrollment = enrollmentRepository.findByIdAndUserId(enrollmentId, userId)
+                .orElseThrow(() -> new IllegalArgumentException("지원 정보를 찾을 수 없습니다: " + enrollmentId));
+        return EnrollmentDto.EnrollmentResponse.from(enrollment);
+    }
+
+    @Transactional
+    public EnrollmentDto.EnrollmentResponse updateEnrollment(Long enrollmentId, Long userId, EnrollmentDto.UpdateRequest request) {
+        Enrollment enrollment = enrollmentRepository.findByIdAndUserId(enrollmentId, userId)
+                .orElseThrow(() -> new IllegalArgumentException("지원 정보를 찾을 수 없습니다: " + enrollmentId));
+        if (enrollment.getStatus() != Enrollment.Status.SUBMITTED) {
+            throw new IllegalStateException("제출 완료 상태의 지원만 수정할 수 있습니다.");
+        }
+        enrollment.update(request.getBidAmount(), request.getProposal());
+        return EnrollmentDto.EnrollmentResponse.from(enrollment);
+    }
+
+    @Transactional
+    public void withdrawEnrollment(Long enrollmentId, Long userId) {
+        Enrollment enrollment = enrollmentRepository.findByIdAndUserId(enrollmentId, userId)
+                .orElseThrow(() -> new IllegalArgumentException("지원 정보를 찾을 수 없습니다: " + enrollmentId));
+        if (enrollment.getStatus() != Enrollment.Status.SUBMITTED) {
+            throw new IllegalStateException("제출 완료 상태의 지원만 취소할 수 있습니다.");
+        }
+        enrollment.cancel();
     }
 
     /**
