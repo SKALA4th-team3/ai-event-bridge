@@ -17,7 +17,7 @@ export const courseApi = {
     return api.post('/api/courses', data)
   },
 
-  update(id, data) {
-    return api.put(`/api/courses/${id}`, data)
+  update(courseId, data) {
+    return api.patch(`/api/courses/${courseId}`, data)
   }
 }

@@ -23,8 +23,11 @@ export const applicationApi = {
   async byUser(userId) {
     return (unwrap(await api.get(`/api/enrollments/user/${userId}`)) ?? []).map(toApplication)
   },
-  /** 지원 → PENDING 즉시 반환. 확정은 Kafka 왕복 후이므로 폴링이 필요합니다. */
-  async apply(postingId) {
-    return toApplication(unwrap(await api.post('/api/enrollments', { courseId: postingId })))
+  /** 지원은 공고(course)의 하위 리소스로 생성한다. */
+  async apply(courseId, { bidAmount, proposal } = {}) {
+    return toApplication(unwrap(await api.post(`/api/courses/${courseId}/enrollments`, {
+      bidAmount,
+      proposal
+    })))
   }
 }

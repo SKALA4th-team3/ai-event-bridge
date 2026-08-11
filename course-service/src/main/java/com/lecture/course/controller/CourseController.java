@@ -43,13 +43,13 @@ public class CourseController {
     }
 
     /**
-     * GET /courses/{id} - 강의 상세
+     * GET /courses/{courseId} - 공고 상세
      */
-    @GetMapping("/{id}")
+    @GetMapping("/{courseId}")
     public ResponseEntity<CourseDto.ApiResponse<CourseDto.CourseResponse>> getCourse(
-            @PathVariable Long id) {
+            @PathVariable("courseId") Long courseId) {
         return ResponseEntity.ok(
-                CourseDto.ApiResponse.success(courseService.getCourse(id))
+                CourseDto.ApiResponse.success(courseService.getCourse(courseId))
         );
     }
 
@@ -65,29 +65,29 @@ public class CourseController {
     }
 
     /**
-     * GET /courses/internal/exists/{id} - 강의 존재 여부 (Enrollment Service 호출)
+     * GET /courses/internal/exists/{courseId} - 공고 존재 여부 (Enrollment Service 호출)
      */
-    @GetMapping("/internal/exists/{id}")
-    public ResponseEntity<Boolean> existsCourse(@PathVariable Long id) {
-        return ResponseEntity.ok(courseService.existsCourse(id));
+    @GetMapping("/internal/exists/{courseId}")
+    public ResponseEntity<Boolean> existsCourse(@PathVariable Long courseId) {
+        return ResponseEntity.ok(courseService.existsCourse(courseId));
     }
 
     /**
-     * GET /courses/internal/{id} - 강의 상세 조회 (Enrollment Service 내부 호출용)
+     * GET /courses/internal/{courseId} - 공고 상세 조회 (Enrollment Service 내부 호출용)
      * - 내 수강 목록 응답 조립 시 사용
      * - 래퍼 없이 CourseResponse만 직접 반환
      */
-    @GetMapping("/internal/{id}")
-    public ResponseEntity<CourseDto.CourseResponse> getCourseInternal(@PathVariable Long id) {
-        return ResponseEntity.ok(courseService.getCourse(id));
+    @GetMapping("/internal/{courseId}")
+    public ResponseEntity<CourseDto.CourseResponse> getCourseInternal(@PathVariable Long courseId) {
+        return ResponseEntity.ok(courseService.getCourse(courseId));
     }
 
     /**
-     * POST /courses/internal/{id}/enrollment-count - 수강생 수 증가 (Enrollment Service 호출)
+     * POST /courses/internal/{courseId}/enrollment-count - 지원 수 증가 (Enrollment Service 호출)
      */
-    @PostMapping("/internal/{id}/enrollment-count")
-    public ResponseEntity<Void> increaseEnrollmentCount(@PathVariable Long id) {
-        courseService.increaseEnrollmentCount(id);
+    @PostMapping("/internal/{courseId}/enrollment-count")
+    public ResponseEntity<Void> increaseEnrollmentCount(@PathVariable Long courseId) {
+        courseService.increaseEnrollmentCount(courseId);
         return ResponseEntity.ok().build();
     }
 
@@ -100,5 +100,38 @@ public class CourseController {
             @RequestParam Course.Category category,
             @RequestParam(defaultValue = "") List<Long> excludeIds) {
         return ResponseEntity.ok(courseService.getRecommendCourses(category, excludeIds));
+    }
+
+    @PatchMapping("/{courseId}")
+    public ResponseEntity<CourseDto.ApiResponse<CourseDto.CourseResponse>> updateCourse(
+            @PathVariable Long courseId, @Valid @RequestBody CourseDto.CreateRequest request,
+            @RequestHeader("X-User-Id") Long userId) {
+        return ResponseEntity.ok(CourseDto.ApiResponse.success(courseService.updateCourse(courseId, request, userId)));
+    }
+
+    @DeleteMapping("/{courseId}")
+    public ResponseEntity<Void> deleteCourse(@PathVariable Long courseId, @RequestHeader("X-User-Id") Long userId) {
+        courseService.deleteCourse(courseId, userId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{courseId}/open")
+    public ResponseEntity<CourseDto.ApiResponse<CourseDto.CourseResponse>> openCourse(@PathVariable Long courseId, @RequestHeader("X-User-Id") Long userId) {
+        return ResponseEntity.ok(CourseDto.ApiResponse.success(courseService.changeStatus(courseId, userId, Course.Status.PUBLISHED)));
+    }
+
+    @PostMapping("/{courseId}/publish")
+    public ResponseEntity<CourseDto.ApiResponse<CourseDto.CourseResponse>> publishCourse(@PathVariable Long courseId, @RequestHeader("X-User-Id") Long userId) {
+        return ResponseEntity.ok(CourseDto.ApiResponse.success(courseService.changeStatus(courseId, userId, Course.Status.OPEN)));
+    }
+
+    @PostMapping("/{courseId}/close")
+    public ResponseEntity<CourseDto.ApiResponse<CourseDto.CourseResponse>> closeCourse(@PathVariable Long courseId, @RequestHeader("X-User-Id") Long userId) {
+        return ResponseEntity.ok(CourseDto.ApiResponse.success(courseService.changeStatus(courseId, userId, Course.Status.CLOSED)));
+    }
+
+    @PostMapping("/{courseId}/complete")
+    public ResponseEntity<CourseDto.ApiResponse<CourseDto.CourseResponse>> completeCourse(@PathVariable Long courseId, @RequestHeader("X-User-Id") Long userId) {
+        return ResponseEntity.ok(CourseDto.ApiResponse.success(courseService.changeStatus(courseId, userId, Course.Status.COMPLETED)));
     }
 }

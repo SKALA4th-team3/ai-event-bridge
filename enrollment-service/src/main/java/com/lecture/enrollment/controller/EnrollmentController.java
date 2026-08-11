@@ -27,7 +27,7 @@ public class EnrollmentController {
             @RequestHeader("X-User-Id") Long userId) {
 
         EnrollmentDto.EnrollmentResponse response =
-                enrollmentService.enroll(userId, request.getCourseId());
+                enrollmentService.apply(userId, request.getCourseId(), request.getBidAmount(), request.getProposal());
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(EnrollmentDto.ApiResponse.success(response));
     }
@@ -55,6 +55,26 @@ public class EnrollmentController {
         List<EnrollmentDto.EnrollmentResponse> response =
                 enrollmentService.getEnrollmentsByUser(userId);
         return ResponseEntity.ok(EnrollmentDto.ApiResponse.success(response));
+    }
+
+    @GetMapping("/{enrollmentId}")
+    public ResponseEntity<EnrollmentDto.ApiResponse<EnrollmentDto.EnrollmentResponse>> getEnrollment(
+            @PathVariable Long enrollmentId, @RequestHeader("X-User-Id") Long userId) {
+        return ResponseEntity.ok(EnrollmentDto.ApiResponse.success(enrollmentService.getEnrollment(enrollmentId, userId)));
+    }
+
+    @PatchMapping("/{enrollmentId}")
+    public ResponseEntity<EnrollmentDto.ApiResponse<EnrollmentDto.EnrollmentResponse>> updateEnrollment(
+            @PathVariable Long enrollmentId, @RequestHeader("X-User-Id") Long userId,
+            @Valid @RequestBody EnrollmentDto.UpdateRequest request) {
+        return ResponseEntity.ok(EnrollmentDto.ApiResponse.success(enrollmentService.updateEnrollment(enrollmentId, userId, request)));
+    }
+
+    @DeleteMapping("/{enrollmentId}")
+    public ResponseEntity<Void> withdrawEnrollment(
+            @PathVariable Long enrollmentId, @RequestHeader("X-User-Id") Long userId) {
+        enrollmentService.withdrawEnrollment(enrollmentId, userId);
+        return ResponseEntity.noContent().build();
     }
 
     /**
