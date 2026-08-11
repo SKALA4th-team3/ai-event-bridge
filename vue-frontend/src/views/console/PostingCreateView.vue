@@ -34,7 +34,7 @@ function next1() {
   if (!f.value.event.trim()) { set('ev', '이벤트명을 입력해 주세요.'); ok = false } else set('ev', '')
   if (!f.value.name.trim()) { set('name', '공사명을 입력해 주세요.'); ok = false } else set('name', '')
   const bd = String(f.value.bud).replace(/[,\s]/g, '')
-  if (!bd || isNaN(+bd) || +bd < 1000000) { set('bud', '100만원 이상 숫자로 입력해 주세요.'); ok = false } else set('bud', '')
+  if (!bd || isNaN(+bd) || +bd < 1000000 || +bd > 99_999_999.99) { set('bud', '100만원 이상 99,999,999.99원 이하 숫자로 입력해 주세요.'); ok = false } else set('bud', '')
   const dd = String(f.value.dd).trim()
   if (!dd || isNaN(+dd) || +dd < 1) { set('dd', '1 이상 숫자로 입력해 주세요.'); ok = false } else set('dd', '')
   if (!ok) return ui.toast('입력값을 확인해 주세요.', 'bad')
@@ -53,7 +53,14 @@ watch(() => route.query.stage, (st) => {
 }, { immediate: true })
 
 const saving = ref(false)
+const MAX_BUDGET = 99_999_999.99
 async function save() {
+  const budget = Number(String(f.value.bud).replace(/[,\s]/g, ''))
+  if (!Number.isFinite(budget) || budget > MAX_BUDGET) {
+    step.value = 1
+    ui.toast('사업 예산은 99,999,999.99원 이하로 입력해 주세요.', 'bad')
+    return
+  }
   saving.value = true
   try {
     const deadline = new Date(Date.now() + Number(f.value.dd) * 86400000).toISOString().slice(0, 10)

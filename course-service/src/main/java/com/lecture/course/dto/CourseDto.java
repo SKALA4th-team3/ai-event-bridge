@@ -2,6 +2,7 @@ package com.lecture.course.dto;
 
 import com.lecture.course.entity.Course;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.*;
@@ -29,6 +30,7 @@ public class CourseDto {
 
         @NotNull(message = "가격은 필수입니다")
         @PositiveOrZero(message = "가격은 0 이상이어야 합니다")
+        @DecimalMax(value = "99999999.99", message = "가격은 99,999,999.99 이하여야 합니다")
         private BigDecimal price;
     }
 
