@@ -125,10 +125,14 @@ export const demoCourses = () => {
 
 /* 내 지원 내역 — enrollments 응답과 같은 모양 */
 export const demoEnrollments = () => ([
-  { id: 1, userId: 1, courseId: 5, status: 'PENDING',   createdAt: iso(-4) + 'T09:00:00' },
-  { id: 2, userId: 1, courseId: 8, status: 'ACTIVE',    createdAt: iso(-8) + 'T09:00:00' },
-  { id: 3, userId: 1, courseId: 12, status: 'PENDING',  createdAt: iso(-10) + 'T09:00:00' },
-  { id: 4, userId: 1, courseId: 2, status: 'CANCELLED', createdAt: iso(-14) + 'T09:00:00' }
+  { id: 1, userId: 1, courseId: 5, status: 'PENDING',   createdAt: iso(-4) + 'T09:00:00',
+    proposal: '운영인력_입찰제안서.pdf' },
+  { id: 2, userId: 1, courseId: 8, status: 'ACTIVE',    createdAt: iso(-8) + 'T09:00:00',
+    proposal: '안전관리_제안서_v2.pdf' },
+  { id: 3, userId: 1, courseId: 12, status: 'PENDING',  createdAt: iso(-10) + 'T09:00:00',
+    proposal: '무대음향_제안서.hwp' },
+  { id: 4, userId: 1, courseId: 2, status: 'CANCELLED', createdAt: iso(-14) + 'T09:00:00',
+    proposal: '홍보물_제안서.pdf' }
 ])
 
 /* 미리보기 모드에서만 시연 데이터로 대체합니다 */

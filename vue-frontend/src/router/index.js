@@ -3,6 +3,12 @@ import { useAuthStore } from '@/store/auth.js'
 import { useProfileStore } from '@/store/profile.js'
 
 const routes = [
+  /* '/' 를 먼저 잡습니다.
+     아래 두 레이아웃이 모두 '/' 로 선언돼 있어, 먼저 오는 인증 레이아웃이
+     '/' 를 가져가는데 빈 경로 자식이 없어 폼 자리가 비어 있었습니다.
+     (왼쪽 브랜드 패널만 뜨고 오른쪽이 하얗던 증상) */
+  { path: '/', redirect: '/home' },
+
   {
     path: '/',
     component: () => import('@/layouts/AuthShell.vue'),
@@ -19,7 +25,6 @@ const routes = [
     component: () => import('@/layouts/AppShell.vue'),
     meta: { requiresSession: true },
     children: [
-      { path: '', redirect: '/home' },
       { path: 'home',         name: 'Home',           component: () => import('@/views/public/HomeView.vue') },
       { path: 'postings',     name: 'PostingList',    component: () => import('@/views/public/PostingListView.vue') },
       { path: 'postings/:id', name: 'PostingDetail',  component: () => import('@/views/public/PostingDetailView.vue') },

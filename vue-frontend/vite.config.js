@@ -34,7 +34,13 @@ export default defineConfig(({ mode }) => {
            SPA의 로그인 화면 경로와 겹쳐 인증 서버 기본 폼이 대신 뜹니다.
            인증 서버로의 이동은 절대 주소(게이트웨이)로 합니다. */
         proxy('/oauth2'),
-        proxy('/userinfo')
+        proxy('/userinfo'),
+        /* 인증 서버 폼 로그인 전용 통로.
+           '/login' 을 그대로 프록시하면 SPA 로그인 화면이 가려지므로
+           접두사를 붙여 부르고 여기서 떼어 냅니다.
+           같은 출처로 부르는 덕에 CORS 없이 세션 쿠키가 붙습니다. */
+        ['/authsrv', { target: gateway, changeOrigin: true, secure: false,
+                       rewrite: (p2) => p2.replace(/^\/authsrv/, '') }]
       ])
     }
   }

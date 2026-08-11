@@ -63,6 +63,39 @@ export const useAuthStore = defineStore('auth', () => {
     window.location.href = `${GATEWAY_URL}/oauth2/authorize?${params.toString()}`
   }
 
+  /* 우리 화면에서 받은 자격 증명으로 곧장 로그인합니다.
+
+     실습 백엔드에는 비밀번호를 받는 API가 없지만,
+     인증 서버의 폼 로그인(POST /login)은 CSRF 토큰 없이 받습니다.
+     세션 쿠키만 생기면 /oauth2/authorize 가 바로 코드를 내주므로,
+     인증 서버 화면에서 같은 계정을 한 번 더 입력할 이유가 없습니다.
+
+     · vite 프록시(/authsrv)를 거쳐 같은 출처로 부릅니다 — CORS 없이 쿠키가 붙습니다.
+     · 쿠키는 포트를 가리지 않아 localhost:8080 요청에도 함께 나갑니다.
+     · 성공하면 '/', 실패하면 '/login?error' 로 끝납니다.
+
+     프록시가 없는 환경(빌드 산출물 등)에서는 false 를 돌려주고,
+     호출한 쪽이 기존 방식(인증 서버 화면으로 이동)으로 넘어갑니다. */
+  async function passwordLogin(email, password) {
+    let res
+    try {
+      res = await fetch('/authsrv/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({ username: email, password }),
+        credentials: 'same-origin'
+      })
+    } catch {
+      return { ok: false, reachable: false }
+    }
+    if (!res.ok && res.status >= 500) return { ok: false, reachable: false }
+    /* 인증 서버가 아니라 SPA 의 index.html 이 돌아왔다면 통로가 없는 것입니다 */
+    const isAuthServer = /\/login|\/$/.test(new URL(res.url).pathname) &&
+                         !res.headers.get('content-type')?.includes('javascript')
+    if (!isAuthServer) return { ok: false, reachable: false }
+    return { ok: !new URL(res.url).search.includes('error'), reachable: true }
+  }
+
   async function handleCallback(code) {
     const res = await authApi.exchangeCode(code)
     console.log('[AuthStore] token response =', res.data)
@@ -87,6 +120,7 @@ export const useAuthStore = defineStore('auth', () => {
     fetchUser,
     logout,
     redirectToLogin,
+    passwordLogin,
     handleCallback
   }
 })
