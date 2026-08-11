@@ -47,7 +47,7 @@ watch(() => props.posting, async (p) => {
           records: null,
           tenure: null,
           fit: null,
-          status: '검토',
+          status: application.status === 'AWARDED' ? '선정' : '검토',
           why: application.proposal ? `제안서: ${application.proposal}` : '제안서 정보 없음',
           reasons: [`지원 금액 ${wonShort(application.bidAmount)}`]
         }
@@ -60,7 +60,7 @@ watch(() => props.posting, async (p) => {
           records: null,
           tenure: null,
           fit: null,
-          status: '검토',
+          status: application.status === 'AWARDED' ? '선정' : '검토',
           why: application.proposal ? `제안서: ${application.proposal}` : '제안서 정보 없음',
           reasons: [`지원 금액 ${wonShort(application.bidAmount)}`]
         }
@@ -89,12 +89,15 @@ const rest = computed(() => eligible.value.filter((b) => b !== top.value))
 const showRejected = ref(false)
 const initial = (name) => name.replace(/[()주]/g, '').charAt(0)
 
-function award(b) {
-  all.value.forEach((x) => { if (x.status === '선정') x.status = '검토' })
-  b.status = '선정'
+async function award(b) {
+  await applicationApi.award(b.id)
+  all.value.forEach((x) => { x.status = x === b ? '선정' : '검토' })
   emit('award', b)
 }
-function undo(b) { b.status = '검토' }
+async function undo(b) {
+  await applicationApi.unaward(b.id)
+  b.status = '검토'
+}
 
 onEscape(() => { if (props.posting) emit('close') })
 </script>

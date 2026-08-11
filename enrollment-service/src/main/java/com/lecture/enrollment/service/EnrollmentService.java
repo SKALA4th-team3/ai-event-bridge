@@ -154,6 +154,37 @@ public class EnrollmentService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
+    public EnrollmentDto.EnrollmentResponse awardEnrollment(Long enrollmentId, Long instructorId) {
+        Enrollment selected = enrollmentRepository.findById(enrollmentId)
+                .orElseThrow(() -> new IllegalArgumentException("지원 정보를 찾을 수 없습니다: " + enrollmentId));
+        Map<String, Object> course = courseServiceClient.getCourse(selected.getCourseId());
+        if (!instructorId.equals(toLong(course.get("instructorId")))) {
+            throw new IllegalArgumentException("업체를 선정할 권한이 없습니다.");
+        }
+
+        enrollmentRepository.findByCourseId(selected.getCourseId()).forEach(enrollment -> {
+            if (enrollment.getId().equals(selected.getId())) {
+                enrollment.award();
+            } else if (enrollment.getStatus() == Enrollment.Status.AWARDED) {
+                enrollment.returnToReview();
+            }
+        });
+        return EnrollmentDto.EnrollmentResponse.from(selected);
+    }
+
+    @Transactional
+    public EnrollmentDto.EnrollmentResponse unawardEnrollment(Long enrollmentId, Long instructorId) {
+        Enrollment enrollment = enrollmentRepository.findById(enrollmentId)
+                .orElseThrow(() -> new IllegalArgumentException("지원 정보를 찾을 수 없습니다: " + enrollmentId));
+        Map<String, Object> course = courseServiceClient.getCourse(enrollment.getCourseId());
+        if (!instructorId.equals(toLong(course.get("instructorId")))) {
+            throw new IllegalArgumentException("업체 선정을 취소할 권한이 없습니다.");
+        }
+        enrollment.returnToReview();
+        return EnrollmentDto.EnrollmentResponse.from(enrollment);
+    }
+
     /**
      * 수강 이력 조회 - 추천 서비스용
      */
