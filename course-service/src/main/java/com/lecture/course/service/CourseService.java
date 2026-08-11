@@ -29,6 +29,7 @@ public class CourseService {
                 .category(request.getCategory())
                 .price(request.getPrice())
                 .instructorId(instructorId)
+                .status(Course.Status.OPEN)
                 .build();
 
         return CourseDto.CourseResponse.from(courseRepository.save(course));
