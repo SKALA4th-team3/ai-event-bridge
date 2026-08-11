@@ -33,18 +33,33 @@ function fillDemo(k) {
 }
 
 const submitting = ref(false)
-function doLogin() {
+async function doLogin() {
   blurEmail(); blurPw()
   if (errEmail.value || errPw.value) return ui.toast('입력값을 확인해 주세요.', 'bad')
   submitting.value = true
 
-  /* 실습 백엔드는 OAuth2 Authorization Code Flow만 제공하고
-     비밀번호를 직접 받는 엔드포인트가 없습니다.
-     자격 증명 확인은 인증 서버 화면이 맡고, 이 화면은 형식 검증과
-     역할 힌트까지를 책임집니다. */
   sessionStorage.setItem('eb.loginRole', /\.go\.kr$/.test(email.value.trim()) ? 'gov' : 'vendor')
   sessionStorage.setItem('eb.loginEmail', email.value.trim())
-  auth.redirectToLogin()
+
+  /* 여기서 입력받은 계정으로 바로 로그인합니다.
+     전에는 인증 서버 화면으로 넘겨서 같은 계정을 한 번 더 입력해야 했습니다. */
+  const r = await auth.passwordLogin(email.value.trim(), pw.value)
+
+  if (r.ok) {
+    /* 세션이 생겼으니 authorize 가 곧바로 코드를 내줍니다 */
+    auth.redirectToLogin()
+    return
+  }
+  if (!r.reachable) {
+    /* 인증 서버에 닿지 못했습니다 (프록시 없는 빌드, 백엔드 미기동 등).
+       기존 방식대로 인증 서버 화면에 맡깁니다. */
+    ui.toast('인증 서버 화면으로 이동합니다.')
+    auth.redirectToLogin()
+    return
+  }
+  submitting.value = false
+  errPw.value = '이메일 또는 비밀번호가 올바르지 않습니다.'
+  ui.toast('로그인하지 못했습니다.', 'bad')
 }
 </script>
 

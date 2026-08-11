@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { wonShort, dateShort } from '@/composables/useFormat.js'
+import { wonShort, dateShort, isUrgent } from '@/composables/useFormat.js'
 import { bidStatus } from '@/constants/status.js'
 import { useApplicationStore } from '@/store/application.js'
 import { usePostingStore } from '@/store/posting.js'
@@ -105,7 +105,7 @@ onEscape(() => { editing.value = null; canceling.value = null })
       <div class="atable">
         <template v-if="rows.length">
           <div class="arow hd">
-            <span>공고</span><span>발주 기관</span><span>예산</span><span>지원일</span><span>제출 서류</span><span>상태</span><span></span>
+            <span>공고</span><span>발주 기관</span><span>예산</span><span>지원일 · 마감</span><span>제출 서류</span><span>상태</span><span></span>
           </div>
           <div v-for="a in rows" :key="a.id" class="arow" :style="a.status === 'CANCELLED' ? 'opacity:.6' : ''">
             <span class="anm">
@@ -114,8 +114,13 @@ onEscape(() => { editing.value = null; canceling.value = null })
             </span>
             <span style="color:var(--tx2);font-size:calc(var(--u)*.8)">{{ orgShort(a.posting?.orgName) }}</span>
             <span class="mono" style="font-weight:700;text-align:right">{{ a.posting ? wonShort(a.posting.budget) : '—' }}</span>
-            <span class="mono" style="color:var(--tx2)">{{ dateShort(a.appliedAt) }}</span>
-            <span class="doc">{{ a.proposal ?? '—' }}</span>
+            <span class="adate">
+              <span class="mono">{{ dateShort(a.appliedAt) }}</span>
+              <small v-if="a.posting" :class="{ hot: isUrgent(a.posting.dday) }">
+                {{ a.posting.dday === null ? '접수 마감 · 심사 중' : `마감 D-${a.posting.dday}` }}
+              </small>
+            </span>
+            <span class="doc" :title="a.proposal ?? ''">{{ a.proposal ?? '—' }}</span>
             <span><span class="badge" :class="bidStatus(a.status).tone">{{ a.withdrawn ? '지원 취소' : bidStatus(a.status).label }}</span></span>
             <span class="rowact">
               <template v-if="a.status === 'PENDING'">
