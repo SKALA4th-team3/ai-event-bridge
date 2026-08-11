@@ -1,0 +1,58 @@
+/* ============================================================
+   디자인 토큰
+   · --u : 기준 단위. 1em이 px로 확정되어 자식에게 상속되므로
+           컴포넌트가 부모 font-size의 영향을 받지 않습니다.
+   · 브랜드(SK 레드·오렌지)와 의미색은 고정, 계절은 환경색만 변경.
+   ============================================================ */
+:root {
+  --u: 1rem;
+  --brand-in: #FFFFFF;
+  --sec: #12657A;  --sec-bg: rgba(18,101,122,.10);  --sec-bd: rgba(18,101,122,.26);
+  --ok:  #1E7A4A;  --ok-bg:  rgba(30,122,74,.10);   --ok-bd:  rgba(30,122,74,.26);
+  --warn:#A8620A;  --warn-bg:rgba(168,98,10,.10);
+  --err: #C0341F;  --err-bg: rgba(192,52,31,.09);
+  --f-sans: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", Pretendard,
+            "Malgun Gothic", "Noto Sans KR", system-ui, sans-serif;
+  --f-mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, monospace;
+}
+
+[data-season="spring"] {
+  --bg:#FFF7F8; --bg2:#FFFFFF; --band:#FBDCE4; --band2:#F8EDE3;
+  --map-1:#FDEFF3; --map-2:#F7DCE4; --map-edge:#EFC3D0; --map-shadow:rgba(160,90,110,.30);
+  --line:rgba(90,50,58,.15); --line-hi:rgba(90,50,58,.28);
+  --tx:#24181C; --tx2:#5E4A51; --tx3:#8C7A81;
+  --brand:#E1462C; --brand-bg:rgba(225,70,44,.11); --brand-bd:rgba(225,70,44,.30);
+  --shadow:0 16px 36px -20px rgba(90,50,58,.45);
+  --th1:linear-gradient(150deg,#F2A0B4,#F7C9A6); --th2:linear-gradient(150deg,#A8D48F,#DCE9A0);
+  --th3:linear-gradient(150deg,#D3B4E4,#F2C2D4); --th4:linear-gradient(150deg,#F5CE8A,#EFAE93);
+}
+[data-season="summer"] {
+  --bg:#F4FAFC; --bg2:#FFFFFF; --band:#D4EAF4; --band2:#E4F2EE;
+  --map-1:#EDF8FC; --map-2:#D6ECF6; --map-edge:#AFD8E8; --map-shadow:rgba(40,110,140,.28);
+  --line:rgba(24,60,72,.15); --line-hi:rgba(24,60,72,.28);
+  --tx:#16232A; --tx2:#455963; --tx3:#758992;
+  --brand:#E24E22; --brand-bg:rgba(226,78,34,.11); --brand-bd:rgba(226,78,34,.30);
+  --shadow:0 16px 36px -20px rgba(24,60,72,.42);
+  --th1:linear-gradient(150deg,#7BC2DC,#A9E0D2); --th2:linear-gradient(150deg,#FFB07A,#FFD1A0);
+  --th3:linear-gradient(150deg,#93BFEA,#C2DAF2); --th4:linear-gradient(150deg,#8FD5A8,#C8E8A8);
+}
+[data-season="autumn"] {
+  --bg:#FDF7EF; --bg2:#FFFFFF; --band:#F9E1C8; --band2:#F6EBDB;
+  --map-1:#FDF3E6; --map-2:#F7E4CE; --map-edge:#E9C9A6; --map-shadow:rgba(150,105,55,.30);
+  --line:rgba(72,52,32,.16); --line-hi:rgba(72,52,32,.29);
+  --tx:#241C13; --tx2:#5C4D3C; --tx3:#8B7B66;
+  --brand:#D6480C; --brand-bg:rgba(214,72,12,.11); --brand-bd:rgba(214,72,12,.30);
+  --shadow:0 16px 36px -20px rgba(72,52,32,.45);
+  --th1:linear-gradient(150deg,#E89355,#F0BE7E); --th2:linear-gradient(150deg,#CDB775,#E6D79E);
+  --th3:linear-gradient(150deg,#DC7F63,#EDAE8A); --th4:linear-gradient(150deg,#B2AC6B,#D8D194);
+}
+[data-season="winter"] {
+  --bg:#F5F8FC; --bg2:#FFFFFF; --band:#DFE8F4; --band2:#EBEEF4;
+  --map-1:#F3F7FD; --map-2:#E1EAF6; --map-edge:#C0D2E8; --map-shadow:rgba(70,100,150,.28);
+  --line:rgba(32,44,66,.15); --line-hi:rgba(32,44,66,.27);
+  --tx:#161C27; --tx2:#47536A; --tx3:#7B8598;
+  --brand:#CE3B2C; --brand-bg:rgba(206,59,44,.11); --brand-bd:rgba(206,59,44,.29);
+  --shadow:0 16px 36px -20px rgba(32,44,66,.42);
+  --th1:linear-gradient(150deg,#9EB6D6,#CBD8EA); --th2:linear-gradient(150deg,#C4BEDD,#E2DCEC);
+  --th3:linear-gradient(150deg,#EBAFA4,#F3CEC4); --th4:linear-gradient(150deg,#A9C7C2,#D2E2DE);
+}

@@ -1,0 +1,15 @@
+*, *::before, *::after { box-sizing: border-box; }
+html { height: 100%; }
+body {
+  margin: 0; height: 100vh; height: 100dvh; overflow: hidden;
+  background: var(--bg); color: var(--tx);
+  font-family: var(--f-sans); font-size: clamp(13px, min(1.02vw, 1.72vh), 16.5px);
+  line-height: 1.5; -webkit-font-smoothing: antialiased; word-break: keep-all;
+}
+#app { height: 100%; }
+h1, h2, h3, h4 { margin: 0; font-weight: 700; letter-spacing: -.02em; }
+p { margin: 0; }
+button { font: inherit; color: inherit; }
+a { color: var(--brand); }
+:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
