@@ -69,6 +69,20 @@ public class EnrollmentController {
         return ResponseEntity.ok(EnrollmentDto.ApiResponse.success(enrollmentService.getEnrollment(enrollmentId, userId)));
     }
 
+    @PostMapping("/{enrollmentId}/award")
+    public ResponseEntity<EnrollmentDto.ApiResponse<EnrollmentDto.EnrollmentResponse>> awardEnrollment(
+            @PathVariable Long enrollmentId, @RequestHeader("X-User-Id") Long instructorId) {
+        return ResponseEntity.ok(EnrollmentDto.ApiResponse.success(
+                enrollmentService.awardEnrollment(enrollmentId, instructorId)));
+    }
+
+    @PostMapping("/{enrollmentId}/unaward")
+    public ResponseEntity<EnrollmentDto.ApiResponse<EnrollmentDto.EnrollmentResponse>> unawardEnrollment(
+            @PathVariable Long enrollmentId, @RequestHeader("X-User-Id") Long instructorId) {
+        return ResponseEntity.ok(EnrollmentDto.ApiResponse.success(
+                enrollmentService.unawardEnrollment(enrollmentId, instructorId)));
+    }
+
     @PatchMapping("/{enrollmentId}")
     public ResponseEntity<EnrollmentDto.ApiResponse<EnrollmentDto.EnrollmentResponse>> updateEnrollment(
             @PathVariable Long enrollmentId, @RequestHeader("X-User-Id") Long userId,

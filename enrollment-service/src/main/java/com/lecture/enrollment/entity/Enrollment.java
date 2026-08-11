@@ -61,6 +61,14 @@ public class Enrollment {
         this.status = Status.WITHDRAWN;
     }
 
+    public void award() {
+        this.status = Status.AWARDED;
+    }
+
+    public void returnToReview() {
+        this.status = Status.UNDER_REVIEW;
+    }
+
     public void update(BigDecimal bidAmount, String proposal) {
         this.bidAmount = bidAmount;
         this.proposal = proposal;

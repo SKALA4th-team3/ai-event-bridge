@@ -27,6 +27,12 @@ export const applicationApi = {
   async byCourse(courseId) {
     return (unwrap(await api.get(`/api/enrollments/courses/${courseId}`)) ?? []).map(toApplication)
   },
+  async award(enrollmentId) {
+    return toApplication(unwrap(await api.post(`/api/enrollments/${enrollmentId}/award`)))
+  },
+  async unaward(enrollmentId) {
+    return toApplication(unwrap(await api.post(`/api/enrollments/${enrollmentId}/unaward`)))
+  },
   /** 지원 생성은 Enrollment Service 경로로 요청한다. */
   async apply(courseId, { bidAmount, proposal } = {}) {
     return toApplication(unwrap(await api.post(`/api/enrollments/courses/${courseId}`, {
