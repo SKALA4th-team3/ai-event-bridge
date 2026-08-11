@@ -1171,3 +1171,9 @@
 @media (max-width:900px){
   .topcard{grid-template-columns:1fr}
 }
+
+/* 콘솔을 벗어나 공개 화면으로 가는 항목 — 같은 무게로 두면
+   대시보드·공고 등록과 나란한 콘솔 메뉴처럼 읽힙니다. */
+.cnav button.sub{margin-top:.5em;padding-top:.6em;border-top:1px solid rgba(255,255,255,.09);
+  border-radius:0;color:#8D95A3;font-size:calc(var(--u)*.8)}
+.cnav button.sub:hover{background:none;color:#fff}
