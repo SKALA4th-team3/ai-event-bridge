@@ -47,6 +47,12 @@ export const useApplicationStore = defineStore('application', () => {
     list.value.unshift(created)
     return created
   }
+  async function update(enrollmentId, { bidAmount, proposal }) {
+    const updated = await applicationApi.update(enrollmentId, { bidAmount, proposal })
+    const index = list.value.findIndex((a) => String(a.id) === String(enrollmentId))
+    if (index >= 0) list.value[index] = { ...list.value[index], ...updated }
+    return updated
+  }
   async function pollUntilActive(postingId, { tries = 8, interval = 900 } = {}) {
     if (offlinePreview()) { await new Promise((r) => setTimeout(r, 1200)); return null }
     for (let i = 0; i < tries; i++) {
@@ -60,5 +66,5 @@ export const useApplicationStore = defineStore('application', () => {
     }
     return null
   }
-  return { list, rows, loading, reviewing, selected, notSelected, hasApplied, load, apply, pollUntilActive }
+  return { list, rows, loading, reviewing, selected, notSelected, hasApplied, load, apply, update, pollUntilActive }
 })

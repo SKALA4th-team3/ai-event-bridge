@@ -5,16 +5,31 @@ import { wonShort, ddayLabel } from '@/composables/useFormat.js'
 import BidderModal from '@/components/console/BidderModal.vue'
 import { usePostingStore } from '@/store/posting.js'
 import { useUiStore } from '@/store/ui.js'
+import { applicationApi } from '@/api/application.js'
 
 const route = useRoute()
 const router = useRouter()
 const posting = usePostingStore()
 const ui = useUiStore()
 
-onMounted(() => posting.load())
+const bidderCounts = ref({})
+async function loadBidderCounts() {
+  const counts = await Promise.all(posting.consoleRows.map(async (p) => {
+    try { return [p.id, (await applicationApi.byCourse(p.id)).length] }
+    catch { return [p.id, p.bidderCount] }
+  }))
+  bidderCounts.value = Object.fromEntries(counts)
+}
+
+onMounted(async () => {
+  await posting.load()
+  await loadBidderCounts()
+})
 
 const rows = computed(() =>
-  [...posting.consoleRows].sort((a, b) => (a.dday === null ? 999 : a.dday) - (b.dday === null ? 999 : b.dday))
+  posting.consoleRows
+    .map((p) => ({ ...p, bidderCount: bidderCounts.value[p.id] ?? p.bidderCount }))
+    .sort((a, b) => (a.dday === null ? 999 : a.dday) - (b.dday === null ? 999 : b.dday))
 )
 const open = computed(() => rows.value.filter((p) => p.dday !== null).length)
 const bids = computed(() => rows.value.reduce((s, p) => s + p.bidderCount, 0))
