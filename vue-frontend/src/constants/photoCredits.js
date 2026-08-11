@@ -1,6 +1,8 @@
-/* 축제 사진 출처.
-   위키미디어 공용의 CC BY / CC BY-SA 사진이라 저작자와 라이선스 표기가 의무입니다.
-   이용 안내 화면 하단에 그대로 노출합니다. */
+/* 축제 사진의 저작자·라이선스.
+
+   화면(이용 안내)에서는 뺐지만 이 목록은 남깁니다 —
+   CC BY / CC BY-SA 는 저작자 표시가 라이선스 의무입니다.
+   여기서 public/festivals/CREDITS.md 를 만들어 저장소에 남깁니다. */
 export const PHOTO_CREDITS = [
   { name: '진해 군항제', author: 'hyolee2', license: 'CC BY-SA 3.0', source: 'https://commons.wikimedia.org/wiki/File%3A2015_Jinhae_Naval_Port_Festival_009.JPG' },
   { name: '여의도 봄꽃축제', author: 'hyolee2', license: 'CC BY-SA 4.0', source: 'https://commons.wikimedia.org/wiki/File%3A2015_Yeongdeungpo_Yeouido_Spring_Flower_Festival_02.JPG' },
