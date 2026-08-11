@@ -14,7 +14,11 @@ const ui = useUiStore()
 
 const TITLES = { Dashboard: '대시보드', PostingCreate: '공고 등록', Bidders: '지원 업체 · AI 추천' }
 const title = computed(() => TITLES[route.name] ?? '발주 콘솔')
-const org = computed(() => profile.org ?? { name: '발주 기관', dept: '담당 부서', manager: '담당자' })
+const org = computed(() => ({
+  name: profile.org?.name || '발주 기관',
+  dept: profile.org?.dept || '담당 부서',
+  manager: profile.org?.manager || '담당자'
+}))
 const bidTotal = computed(() => posting.consoleRows.reduce((s, p) => s + p.bidderCount, 0))
 const unread = computed(() => ui.notifications.filter((n) => !n.read).length)
 

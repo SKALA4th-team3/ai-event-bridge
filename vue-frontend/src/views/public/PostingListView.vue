@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { CATEGORIES } from '@/constants/categories.js'
 import { REGION_GROUPS } from '@/constants/regions.js'
@@ -66,6 +66,51 @@ const isOn = (axis, v) => (axis === 'period' ? posting.filters.period === v : po
    ① 이벤트 카드 그리드  ② 선택한 이벤트의 공사 내역
    선택 상태를 주소에 실어 두면 뒤로가기와 링크 공유가 그냥 됩니다. */
 const selected = computed(() => route.query.event ?? null)
+
+/* 필터도 같은 원칙을 따릅니다.
+   지금까지 네 축은 스토어에만 있어서, 새로고침하면 날아가고
+   "제주 + 3천만원 이하로 걸러 둔 목록"을 팀원에게 링크로 못 보냈습니다.
+
+   push 가 아니라 replace 를 씁니다. 칩을 누를 때마다 방문 기록이 쌓이면
+   목록을 벗어나려고 뒤로가기를 여섯 번 눌러야 합니다. */
+const Q = { period: 'period', regions: 'region', categories: 'cat', budgets: 'budget' }
+let syncing = false
+
+function readQuery() {
+  syncing = true
+  const f = posting.filters
+  f.period = route.query[Q.period] ?? ''
+  for (const key of ['regions', 'categories', 'budgets']) {
+    const raw = route.query[Q[key]]
+    f[key] = raw ? String(raw).split(',').filter(Boolean) : []
+  }
+  if (route.query.sort) posting.sort = String(route.query.sort)
+  nextTick(() => { syncing = false })
+}
+
+function writeQuery() {
+  if (syncing) return
+  const f = posting.filters
+  const q = { ...route.query }
+  f.period ? (q[Q.period] = f.period) : delete q[Q.period]
+  for (const key of ['regions', 'categories', 'budgets']) {
+    f[key].length ? (q[Q[key]] = f[key].join(',')) : delete q[Q[key]]
+  }
+  posting.sort === 'deadline' ? delete q.sort : (q.sort = posting.sort)
+  /* 필터를 바꾸면 열어 둔 이벤트는 목록에 없을 수 있으니 접습니다 */
+  delete q.event
+  if (JSON.stringify(q) === JSON.stringify(route.query)) return
+  router.replace({ query: q })
+}
+
+readQuery()
+watch(() => [posting.filters.period, posting.filters.regions.join(), posting.filters.categories.join(),
+             posting.filters.budgets.join(), posting.sort], writeQuery)
+/* 뒤로/앞으로 가면 주소가 진실입니다 */
+watch(() => route.query, (q, prev) => {
+  const changed = ['period', 'region', 'cat', 'budget', 'sort'].some((k) => q[k] !== prev?.[k])
+  if (changed) readQuery()
+})
 
 const events = computed(() => {
   const list = onlySaved.value
@@ -149,7 +194,7 @@ const openWork = (w) => router.push(`/postings/${w.id}`)
               </span>
               <span class="tr-b">
                 <b>{{ isGov ? t.name : t.eventName }}</b>
-                <em>{{ isGov ? `${t.loc} · ${t.category}` : `${t.location} · ${t.name}` }}</em>
+                <em>{{ isGov ? t.category : t.location }}</em>
                 <span class="tr-f">
                   <span class="bar"><i :style="{ width: (isGov ? t.fit : t.fit ?? 0) + '%' }" /></span>
                   <i>{{ isGov ? t.fit : t.fit ?? 0 }}%</i>
