@@ -167,6 +167,19 @@ onMounted(() => {
 })
 onUnmounted(() => clearInterval(timer))
 
+/* ── 업체 검토 의견 ────────────────────────────────────────
+   카드를 누르면 바로 발송하지 않고 근거부터 보여 줍니다.
+   제안 발송은 되돌릴 수 없어, 한 번은 멈춰 세우는 게 맞습니다. */
+const firm2 = ref(null)
+const sent = ref(new Set())
+const openFirm = (b) => { firm2.value = b }
+function sendProposal() {
+  sent.value = new Set([...sent.value, firm2.value.id])
+  ui.notify('제안을 발송했습니다', firm2.value.name)
+  ui.toast(`${firm2.value.name}에 제안을 발송했습니다.`, 'good')
+  firm2.value = null
+}
+
 /* ── 하단 바 ───────────────────────────────────────────── */
 const myOpen = computed(() => {
   const mine = posting.consoleRows.filter((p) => p.dday !== null)
@@ -295,8 +308,8 @@ const open = (p) => router.push(`/postings/${p.id}`)
               </template>
               <template v-else>
         <article v-for="(b, i) in pg" :key="b.id" class="hcard">
-                  <button class="ec-hit" :aria-label="`${b.name}에 제안 발송`"
-                          @click="ui.toast(`${b.name}에 제안을 발송했습니다.`, 'good')" />
+                  <button class="ec-hit" :aria-label="`${b.name} 검토 의견 보기`"
+                          @click="openFirm(b)" />
                   <span class="hc-th" :class="th(i)" />
                   <span class="hc-body">
                     <span class="hc-top">
@@ -341,6 +354,38 @@ const open = (p) => router.push(`/postings/${p.id}`)
           <span class="big">🔍</span>
           <b>{{ tab === 'fit' ? '업종에 맞는 공고가 아직 없습니다' : '해당하는 공고가 없습니다' }}</b>
           시즌을 바꾸거나 활동 지역·업종을 넓히면 더 많은 공고를 볼 수 있습니다.
+        </div>
+      </div>
+    </div>
+
+    <!-- 업체 검토 의견 -->
+    <div v-if="firm2" class="ovl" @click.self="firm2 = null">
+      <div class="ovlcard" style="text-align:left">
+        <h3 style="text-align:center">{{ firm2.name }}</h3>
+        <p class="p" style="text-align:center">{{ firm2.loc }} · {{ firm2.category }} · 수행 {{ firm2.records }}건</p>
+
+        <div class="aipanel" style="margin-bottom:.9em">
+          <h4>✦ AI 검토 의견</h4>
+          <div class="why2">{{ firm2.why }}</div>
+          <div v-for="(t, i) in firm2.reasons" :key="i" class="reason">
+            <span class="m">·</span><span>{{ t }}</span>
+          </div>
+          <div class="reason" style="margin-top:.6em">
+            <span class="m">◎</span>
+            <span>적합도 <b style="color:var(--sec)">{{ firm2.fit }}%</b>
+              <span class="bar" style="display:inline-block;width:8em;vertical-align:middle;margin-left:.5em">
+                <i :style="{ width: firm2.fit + '%' }" /></span>
+            </span>
+          </div>
+        </div>
+
+        <p class="ovlnote" style="margin-bottom:.9em">
+          제안을 보내면 해당 업체에 알림이 전달됩니다. <b>발송 후에는 되돌릴 수 없습니다.</b>
+        </p>
+        <div class="ovlacts">
+          <button class="btn sec" @click="firm2 = null">닫기</button>
+          <button v-if="!sent.has(firm2.id)" class="btn pri" @click="sendProposal">제안 발송</button>
+          <button v-else class="btn sec" disabled>발송 완료</button>
         </div>
       </div>
     </div>
