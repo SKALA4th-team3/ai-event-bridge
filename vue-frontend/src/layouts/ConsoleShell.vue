@@ -21,8 +21,10 @@ const org = computed(() => ({
 const unread = computed(() => ui.notifications.filter((n) => !n.read).length)
 
 const auth = useAuthStore()
-function signOut() {
-  profile.clear(); auth.logout(false)
+async function signOut() {
+  profile.clear()
+  /* 인증 서버 세션까지 끊고 나서 화면을 옮깁니다 */
+  await auth.logout(false)
   router.push('/login'); ui.toast('로그아웃되었습니다.')
 }
 </script>
