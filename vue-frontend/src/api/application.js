@@ -11,6 +11,7 @@ export function toApplication(e) {
     userId: e.userId,
     status: e.status,                       // PENDING | ACTIVE | CANCELLED
     appliedAt: e.createdAt,
+    bidAmount: e.bidAmount ?? null,
     proposal: e.proposal ?? null,
     posting: e.course ? toPosting({ ...e.course, price: e.course.price }) : null
   }
@@ -22,6 +23,9 @@ export const applicationApi = {
   },
   async byUser(userId) {
     return (unwrap(await api.get(`/api/enrollments/user/${userId}`)) ?? []).map(toApplication)
+  },
+  async byCourse(courseId) {
+    return (unwrap(await api.get(`/api/enrollments/courses/${courseId}`)) ?? []).map(toApplication)
   },
   /** 지원 생성은 Enrollment Service 경로로 요청한다. */
   async apply(courseId, { bidAmount, proposal } = {}) {
