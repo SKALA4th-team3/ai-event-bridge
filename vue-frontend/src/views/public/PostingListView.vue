@@ -10,6 +10,8 @@ import { usePostingStore } from '@/store/posting.js'
 import { useApplicationStore } from '@/store/application.js'
 import { useUiStore } from '@/store/ui.js'
 import { useBookmarkStore } from '@/store/bookmark.js'
+import { recommendFor } from '@/composables/useFitScore.js'
+import { DEMO_BIDDERS } from '@/constants/demoBidders.js'
 import { useProfileStore } from '@/store/profile.js'
 
 const router = useRouter()
@@ -31,6 +33,12 @@ const AXES = [
 ]
 /* 업체 프로필이 있어야 적합도가 계산됩니다 (기관은 표시하지 않습니다) */
 const hasFirm = computed(() => !!profile.firm)
+const isGov = computed(() => profile.data?.kind === 'gov')
+
+/* 상단 추천 — 목록을 훑기 전에 '먼저 볼 것'을 5개만 띄웁니다.
+   업체에겐 맞는 공고, 기관에겐 적합한 업체입니다. */
+const topPicks = computed(() =>
+  isGov.value ? DEMO_BIDDERS.slice(0, 5) : recommendFor(posting.scored, profile.firm, 5))
 
 /* 관심 공고 — 스토어에서 관리합니다(store/bookmark.js) */
 const onlySaved = ref(route.query.saved === '1')
@@ -127,6 +135,28 @@ const openWork = (w) => router.push(`/postings/${w.id}`)
       </div>
 
       <div class="llist">
+        <!-- 상단 추천 — 목록 앞에 '먼저 볼 것' 5개 -->
+        <section v-if="!current && topPicks.length" class="toprec">
+          <div class="tr-head">
+            <h3>{{ isGov ? '이 조건에 적합한 업체' : '우리 업체에 맞는 공고' }}</h3>
+            <span class="why">{{ isGov ? '업종·수행 이력 기준 · 적합도순' : `업종 ‘${profile.firm?.category ?? '미등록'}’ 우선 · 적합도순` }}</span>
+          </div>
+          <div class="tr-list">
+            <button v-for="(t, i) in topPicks" :key="t.id" class="trcard" @click="isGov ? null : openWork(t)">
+              <span class="tr-th" :class="`th${(i % 4) + 1}`"
+                    :style="!isGov && t.photo ? { backgroundImage: `url(${t.photo})` } : null" />
+              <span class="tr-b">
+                <b>{{ isGov ? t.name : t.eventName }}</b>
+                <em>{{ isGov ? `${t.loc} · ${t.category}` : `${t.location} · ${t.name}` }}</em>
+                <span class="tr-f">
+                  <span class="bar"><i :style="{ width: (isGov ? t.fit : t.fit ?? 0) + '%' }" /></span>
+                  <i>{{ isGov ? t.fit : t.fit ?? 0 }}%</i>
+                </span>
+              </span>
+            </button>
+          </div>
+        </section>
+
         <!-- ② 선택한 이벤트의 공사 내역 -->
         <template v-if="current">
           <button class="backlink" @click="back">← 전체 이벤트</button>

@@ -24,7 +24,10 @@ export default defineConfig(({ mode }) => {
     server: {
       host: 'localhost',
       port,
-      strictPort: true,
+      /* 3000 이 이미 쓰이면 다음 포트로 비켜갑니다.
+         strictPort 로 막아 두면 vite 가 아예 안 떠서 "화면이 안 나온다"가 됩니다.
+         다만 OAuth 콜백이 3000 으로 고정이라, 실제 로그인까지 하려면 3000 을 비워야 합니다. */
+      strictPort: false,
       proxy: Object.fromEntries([
         proxy('/api'),
         /* 토큰 교환·JWKS 용. /login·/logout 은 프록시하지 않습니다 —

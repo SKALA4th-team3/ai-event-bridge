@@ -17,12 +17,6 @@ const emit = defineEmits(['close', 'apps', 'retry', 'submit'])
 const amount = ref('')
 const err = ref('')
 const budget = computed(() => props.posting?.budget ?? 0)
-/* 공고가 늦게 로드되는 경우(딥링크)도 있어 둘 다 지켜봅니다 */
-watch([() => props.state, budget], ([v, b]) => {
-  if (v === 1 && b && !amount.value) { amount.value = String(b); err.value = '' }
-  if (v !== 1) { amount.value = ''; clearFile() }
-}, { immediate: true })
-
 /* 제안서 — 명세의 '제안서 파일'에 해당합니다.
    ★ 백엔드에 업로드 엔드포인트가 없어 지금은 파일을 고르고 확인만 합니다.
      POST /api/bids/{id}/proposal 이 생기면 submit에서 함께 보내면 됩니다. */
@@ -49,6 +43,13 @@ function pick(f) {
 }
 const onDrop = (e) => { dragging.value = false; pick(e.dataTransfer?.files?.[0]) }
 const clearFile = () => { file.value = null; fileErr.value = ''; if (picker.value) picker.value.value = '' }
+
+/* 공고가 늦게 로드되는 딥링크도 있어 둘 다 지켜봅니다.
+   clearFile 을 쓰므로 선언 뒤에 두어야 합니다 (const 는 끌어올려지지 않습니다). */
+watch([() => props.state, budget], ([v, b]) => {
+  if (v === 1 && b && !amount.value) { amount.value = String(b); err.value = '' }
+  if (v !== 1) { amount.value = ''; clearFile() }
+}, { immediate: true })
 
 function submit() {
   const n = Number(String(amount.value).replace(/[,\s]/g, ''))
