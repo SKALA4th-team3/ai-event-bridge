@@ -229,7 +229,49 @@ docker exec -i lecturedb mariadb -umanager -pSqlDba-1 lecture_db < demo-data.sql
 
 ---
 
-## 7. 알아둘 제약
+## 7. AI 검색 (선택)
+
+검색창의 문장을 **우리 필터 축(기간·지역·분야·예산)으로 옮기는 데만** AI를 씁니다.
+검색 결과를 고르는 일은 기존 데이터에서 하므로, 없는 공고가 결과에 섞이지 않습니다.
+
+```
+"서울이랑 전라에서 홍보 디자인 3천만원 이하로 이번 달 마감"
+        ↓  Firebase AI Logic → Gemini
+{ period:'이번 달', regions:['서울','전라'],
+  categories:['홍보·디자인'], budgets:['3천만 이하'], text:'' }
+        ↓  conditionsToFilters → applyFilters
+    기존 공고 데이터에서 걸러 낸 결과
+```
+
+**설정하지 않아도 검색은 됩니다.** 키가 없거나 호출이 실패·지연되면
+규칙 기반 파서로 넘어갑니다 (`composables/useQueryParser.js`).
+
+### 켜는 방법
+
+1. Firebase Console에서 프로젝트 생성
+2. **AI Logic → Get started → provider를 `Gemini Developer API`로 선택**
+   (Spark 무료 플랜 유지, 결제 연결 불필요)
+3. 프로젝트 설정 → 내 앱 → 웹 앱 추가 → 아래 값을 `vue-frontend/.env`에
+
+```
+VITE_FIREBASE_API_KEY=
+VITE_FIREBASE_AUTH_DOMAIN=
+VITE_FIREBASE_PROJECT_ID=
+VITE_FIREBASE_APP_ID=
+VITE_GEMINI_MODEL=      # 콘솔이 안내하는 Flash 계열 모델 ID
+```
+
+4. **App Check를 켜세요.** 위 네 값은 비밀키가 아니라 공개 식별자라
+   (웹 앱 번들에 원래 노출됩니다) 호출 권한은 App Check가 통제합니다.
+   Gemini API 키는 브라우저 코드에 들어가지 않습니다.
+
+> AI가 고를 수 있는 값은 `Schema.enumString` 으로 우리 축의 라벨에 묶여 있습니다.
+> '부스설치'처럼 한 글자 다른 값이 와서 조용히 0건이 되는 일을 막습니다.
+> 축으로 옮길 수 없는 말(축제명 등)만 `text` 로 받아 이름에서 찾습니다.
+
+---
+
+## 8. 알아둘 제약
 
 프론트엔드는 백엔드를 고치지 않고 만들었습니다. 그래서 남는 제약이 있습니다.
 

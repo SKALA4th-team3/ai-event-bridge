@@ -3,6 +3,7 @@ import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import KoreaMap from '@/components/public/KoreaMap.vue'
 import { parseQuery, conditionsToFilters, SAMPLE_QUERIES } from '@/composables/useQueryParser.js'
+import { analyzeQuery, toConditions, aiConfigured } from '@/lib/aiSearch.js'
 import { recommendFor } from '@/composables/useFitScore.js'
 import { applyFilters } from '@/composables/useFilters.js'
 import { won, wonShort, ddayLabel, isUrgent } from '@/composables/useFormat.js'
@@ -48,7 +49,28 @@ const regionsPicked = computed(() =>
 )
 /* 칩을 목록에 적용했을 때 몇 건이 남는지 — 스토어를 건드리지 않고 계산합니다 */
 const hitCount = computed(() => applyFilters(posting.scored, conditionsToFilters(st.value)).length)
-function search() { st.value = parseQuery(q.value); ui.toast(`조건 ${st.value.length}개를 읽었습니다.`) }
+/* 문장을 조건으로 옮깁니다.
+   AI 가 설정돼 있으면 AI 가, 아니면(또는 실패하면) 규칙 파서가 맡습니다.
+   어느 쪽이든 결과를 고르는 건 applyFilters 라, 없는 공고가 섞이지 않습니다. */
+const thinking = ref(false)
+async function search() {
+  const text = q.value.trim()
+  if (!text) return
+  thinking.value = true
+  try {
+    const ai = aiConfigured ? await analyzeQuery(text) : null
+    st.value = ai ? toConditions(ai) : parseQuery(text)
+    ui.toast(
+      st.value.length
+        ? `조건 ${st.value.length}개를 읽었습니다.${ai ? '' : ''}`
+        : '조건을 찾지 못했습니다. 지역·분야·기간을 넣어 보세요.',
+      st.value.length ? 'info' : 'bad',
+      'search'
+    )
+  } finally {
+    thinking.value = false
+  }
+}
 function pickSample(s) { q.value = s; st.value = parseQuery(s) }
 function dropChip(c) { st.value = st.value.filter((x) => x !== c) }
 /* 조건을 하나씩 지우는 건 일이라 한 번에 비우는 길을 둡니다 */
@@ -209,8 +231,8 @@ onEscape(() => { firm2.value = null })
 
         <form class="searchbar" @submit.prevent="search">
           <span class="ico">✦</span>
-          <input v-model="q" aria-label="공고 검색" autocomplete="off">
-          <button type="submit" class="btn pri">찾기</button>
+          <input v-model="q" aria-label="공고 검색" autocomplete="off" :disabled="thinking">
+          <button type="submit" class="btn pri" :disabled="thinking">{{ thinking ? '읽는 중…' : '찾기' }}</button>
         </form>
 
         <div class="parsed" aria-live="polite">
