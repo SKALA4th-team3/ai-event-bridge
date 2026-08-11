@@ -38,11 +38,24 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  function logout(redirect = true) {
+  /* 우리 토큰만 지우면 인증 서버 세션(JSESSIONID)이 그대로 남습니다.
+     그 상태로 /oauth2/authorize 를 타면 로그인 화면 없이 곧바로
+     '직전 계정'의 코드가 나옵니다 — 기관으로 로그아웃한 뒤 업체 이메일을
+     넣어도 기관으로 되돌아오는 이유였습니다.
+
+     인증 서버에도 로그아웃을 알려 세션을 끊습니다.
+     같은 출처(/authsrv)로 부르므로 쿠키가 함께 나갑니다. */
+  async function endAuthServerSession() {
+    try { await fetch('/authsrv/logout', { credentials: 'same-origin' }) } catch { /* 백엔드가 없어도 진행합니다 */ }
+  }
+
+  async function logout(redirect = true) {
     accessToken.value = null
     user.value = null
     sessionStorage.removeItem('access_token')
     sessionStorage.removeItem('user')
+
+    await endAuthServerSession()
 
     if (redirect) {
       window.location.href = '/login'
