@@ -1,5 +1,4 @@
 <script setup>
-import { PHOTO_CREDITS } from '@/constants/photoCredits.js'
 const GOV = [
   ['기관 계정 개설', '기관 도메인 이메일로 가입하면 도메인 인증과 운영자 승인을 거쳐 개설됩니다. 같은 기관 동료는 초대로 추가합니다.'],
   ['이벤트와 공사 등록', '하나의 이벤트에 부스·무대·인력 등 여러 공사를 나눠 등록합니다.'],
@@ -56,21 +55,6 @@ const VENDOR = [
           마감이 지나면 공고는 <b>심사 중</b>으로 바뀌고, 접수한 입찰도 함께 심사에 들어갑니다.
           결과는 마감 후 영업일 5일 이내 알림으로 전달됩니다.
         </p>
-      </div>
-
-      <div class="panel" style="grid-column:1/-1">
-        <h3 style="margin:0 0 .5em;font-size:calc(var(--u)*.96);font-weight:700">사진 출처</h3>
-        <p style="margin:0 0 .6em;font-size:calc(var(--u)*.78);color:var(--tx2);line-height:1.6">
-          축제 사진은 위키미디어 공용의 자유 라이선스 사진입니다. 저작자와 라이선스를 아래에 밝힙니다.
-        </p>
-        <ul style="margin:0;padding:0;list-style:none;display:grid;gap:.3em;
-                   grid-template-columns:repeat(auto-fill,minmax(20em,1fr))">
-          <li v-for="c in PHOTO_CREDITS" :key="c.name"
-              style="font-size:calc(var(--u)*.74);color:var(--tx2);line-height:1.5">
-            <b style="color:var(--tx)">{{ c.name }}</b> — {{ c.author }},
-            <a :href="c.source" target="_blank" rel="noopener">{{ c.license }}</a>
-          </li>
-        </ul>
       </div>
 
       <div class="panel faq">
