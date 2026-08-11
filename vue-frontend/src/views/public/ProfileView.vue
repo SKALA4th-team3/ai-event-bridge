@@ -1,18 +1,24 @@
 <script setup>
 import { ref, computed } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { CATEGORIES } from '@/constants/categories.js'
 import { REGION_GROUPS } from '@/constants/regions.js'
 import { useProfileStore } from '@/store/profile.js'
 import { useAuthStore } from '@/store/auth.js'
 import { useUiStore } from '@/store/ui.js'
 
+const route = useRoute()
 const router = useRouter()
 const profile = useProfileStore()
 const auth = useAuthStore()
 const ui = useUiStore()
 
 const isGov = computed(() => profile.data?.kind === 'gov')
+
+/* 이 화면은 업체(/me)와 기관(/console/me) 두 자리에서 함께 씁니다.
+   router.back() 은 직전이 로그인이면 로그인으로 돌아가 버려서,
+   각자의 일터로 보냅니다. */
+const goBack = () => router.push(route.path.startsWith('/console') ? '/console' : '/home')
 const editing = ref(false)
 const saving = ref(false)
 const e = ref({})
@@ -66,7 +72,7 @@ async function save() {
       </span>
       <span style="margin-left:auto;display:flex;gap:.5em">
         <template v-if="!editing">
-          <button class="btn sec" @click="router.back()">뒤로</button>
+          <button class="btn sec" @click="goBack">뒤로</button>
           <button class="btn pri" @click="start">정보 수정</button>
         </template>
         <template v-else>
