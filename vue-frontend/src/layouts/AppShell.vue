@@ -24,9 +24,13 @@ const name = computed(() => profile.data?.name || auth.user?.name || '게스트'
 const initial = computed(() => name.value.replace(/[()주]/g, '').charAt(0))
 const unread = computed(() => ui.notifications.filter((n) => !n.read).length)
 
+/* 기관의 일터는 콘솔입니다.
+   이 공개 화면은 기관에게 '업체 찾기' 하나의 뜻만 갖습니다 —
+   문장 검색·지도·추천 업체가 전부 업체를 고르는 도구입니다.
+   공고를 찾고 지원하는 메뉴는 업체의 일이라 기관에게는 내리지 않습니다. */
 const NAV = computed(() =>
   isGov.value
-    ? [['Home', '공고 찾기'], ['PostingList', '카테고리별'], ['Guide', '이용 안내']]
+    ? [['Home', '업체 찾기'], ['Guide', '이용 안내']]
     : [['Home', '공고 찾기'], ['PostingList', '카테고리별'], ['MyApplications', '내 지원'], ['Guide', '이용 안내']]
 )
 const active = (n) => route.name === n || (n === 'PostingList' && route.name === 'PostingDetail')

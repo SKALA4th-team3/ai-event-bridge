@@ -123,7 +123,7 @@ const kicker = computed(() =>
   isGov.value ? `${profile.org?.name ?? '발주 기관'} · ${profile.org?.dept ?? '담당 부서'}`
               : `${firm.value?.name ?? '우리 업체'} · ${firm.value?.category ?? '업종 미등록'}`)
 const sub = computed(() =>
-  isGov.value ? '등록한 공고 요건에 맞춰 AI가 적합한 업체를 찾아 제안을 보냅니다.'
+  isGov.value ? '등록한 공고 요건에 맞춰 AI가 적합한 업체를 찾아 제안을 보냅니다. 공고 등록과 선정은 콘솔에서 합니다.'
               : '등록하신 업종에 맞는 공고를 마감이 가까운 순서로 모았습니다.')
 const recTitle = computed(() => (isGov.value ? '내 공고에 추천된 업체' : '우리 업체에 맞는 공고'))
 const recWhy = computed(() => {
@@ -204,7 +204,7 @@ onEscape(() => { firm2.value = null })
         <span class="kicker">{{ kicker }}</span>
         <h1 v-if="!isGov && soonCount">이번 주 마감 <em>{{ soonCount }}건</em>, 확인하셨나요</h1>
         <h1 v-else-if="!isGov">지금 지원할 수 있는 공고 <em>{{ live.length }}건</em></h1>
-        <h1 v-else>공고를 등록하고 <em>업체</em>를 찾으세요</h1>
+        <h1 v-else>우리 공고에 맞는 <em>업체</em>를 찾으세요</h1>
         <p class="sub">{{ sub }}</p>
 
         <form class="searchbar" @submit.prevent="search">
@@ -271,7 +271,8 @@ onEscape(() => { firm2.value = null })
         </template>
         <h2 v-else>{{ recTitle }}</h2>
         <span class="why">{{ recWhy }}</span>
-        <button class="more" @click="router.push('/postings')">카테고리별로 보기 →</button>
+        <button v-if="isGov" class="more" @click="router.push('/console')">지원 업체 관리 →</button>
+        <button v-else class="more" @click="router.push('/postings')">카테고리별로 보기 →</button>
       </div>
 
       <div class="carousel" @mouseenter="paused = true" @mouseleave="paused = false"
