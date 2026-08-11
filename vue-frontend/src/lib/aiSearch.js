@@ -24,15 +24,46 @@ import { REGION_GROUPS } from '@/constants/regions.js'
 import { CATEGORIES } from '@/constants/categories.js'
 
 const env = import.meta.env
-/* 모델 ID 는 Firebase 콘솔이 안내하는 현재 Flash 계열 값을 넣으세요.
-   버전이 오르면 .env 만 고치면 됩니다. */
-const MODEL = env.VITE_GEMINI_MODEL || 'gemini-flash-latest'
+
+/* ── 팀 공용 설정 ────────────────────────────────────────────
+   .env 는 .gitignore 에 있어 pull 로는 오지 않습니다. 그래서 팀이 함께
+   쓰는 값은 여기 둡니다 — 저장소를 받으면 바로 AI 검색이 됩니다.
+
+   여기 적힌 값은 비밀이 아닙니다. Firebase 웹 설정과 reCAPTCHA 사이트 키는
+   어차피 클라이언트 번들에 실려 브라우저에 노출되는 공개 식별자입니다.
+   호출을 막는 것은 App Check 이고, reCAPTCHA 키의 허용 도메인은
+   localhost 로 묶여 있습니다.
+
+   ★ reCAPTCHA '비밀 키'는 여기 두지 않습니다. 그건 Firebase 콘솔에만 있습니다.
+
+   각자의 .env 로 덮어쓸 수 있습니다 (다른 Firebase 프로젝트를 쓸 때). */
+const TEAM = {
+  apiKey: 'AIzaSyAQ4Mc9OXEdfSb0caWjEDF_m4TWvk300BQ',
+  authDomain: 'ai-event-bridge.firebaseapp.com',
+  projectId: 'ai-event-bridge',
+  appId: '1:973186344892:web:594e2a59854eb299a22db9',
+  appCheckSiteKey: '6LfYJIAtAAAAAJvOAut8WAydd59l1VFG3bAIWpi7',
+  model: 'gemini-flash-latest'
+}
+
+/* App Check 디버그 토큰.
+   true 로 두면 브라우저마다 다른 UUID 가 생겨 각자 콘솔에 등록해야 합니다.
+   이미 등록해 둔 값을 고정으로 쓰면 팀원은 등록할 일이 없습니다.
+
+   TEAM 객체 안에 두면 객체가 살아 있어 빌드 산출물에도 문자열이 남습니다.
+   삼항으로 감싸면 import.meta.env.DEV 가 false 로 치환되면서 통째로 지워집니다.
+   디버그 토큰은 App Check 를 우회하는 값이라 배포본에 남기지 않습니다. */
+const DEBUG_TOKEN = import.meta.env.DEV
+  ? (env.VITE_APPCHECK_DEBUG_TOKEN || 'ab936521-0b9c-4c44-85a9-3717140f87f4')
+  : null
+
+const MODEL = env.VITE_GEMINI_MODEL || TEAM.model
 
 const CONFIG = {
-  apiKey: env.VITE_FIREBASE_API_KEY,
-  authDomain: env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: env.VITE_FIREBASE_PROJECT_ID,
-  appId: env.VITE_FIREBASE_APP_ID
+  apiKey: env.VITE_FIREBASE_API_KEY || TEAM.apiKey,
+  authDomain: env.VITE_FIREBASE_AUTH_DOMAIN || TEAM.authDomain,
+  projectId: env.VITE_FIREBASE_PROJECT_ID || TEAM.projectId,
+  appId: env.VITE_FIREBASE_APP_ID || TEAM.appId
 }
 /* App Check 는 선택이 아닙니다. 등록하지 않으면 호출이 403 으로 막힙니다:
    "This AI Logic Project is inactive. Please complete onboarding and enable App Check"
@@ -41,7 +72,7 @@ const CONFIG = {
      v3         — 일반 reCAPTCHA. google.com/recaptcha/admin 에서 무료로 만듭니다.
                   GCP 결제 계정이 필요 없어 실습·데모에 맞습니다.
      enterprise — reCAPTCHA Enterprise. GCP 에서 키를 만들며 결제 계정을 요구합니다. */
-const APPCHECK_SITE_KEY = env.VITE_FIREBASE_APPCHECK_SITE_KEY
+const APPCHECK_SITE_KEY = env.VITE_FIREBASE_APPCHECK_SITE_KEY || TEAM.appCheckSiteKey
 const APPCHECK_PROVIDER = (env.VITE_FIREBASE_APPCHECK_PROVIDER || 'v3').toLowerCase()
 export const aiConfigured = Object.values(CONFIG).every(Boolean)
 
@@ -62,7 +93,8 @@ async function setupAppCheck(app) {
   appCheckDone = true
   const { initializeAppCheck, ReCaptchaV3Provider, ReCaptchaEnterpriseProvider } =
     await import('firebase/app-check')
-  if (import.meta.env.DEV) self.FIREBASE_APPCHECK_DEBUG_TOKEN = true
+  /* 등록해 둔 토큰을 고정으로 씁니다 — 팀원이 각자 등록할 필요가 없습니다 */
+  if (DEBUG_TOKEN) self.FIREBASE_APPCHECK_DEBUG_TOKEN = DEBUG_TOKEN
   const provider = APPCHECK_PROVIDER === 'enterprise'
     ? new ReCaptchaEnterpriseProvider(APPCHECK_SITE_KEY)
     : new ReCaptchaV3Provider(APPCHECK_SITE_KEY)
