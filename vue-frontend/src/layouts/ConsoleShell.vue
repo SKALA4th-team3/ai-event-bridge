@@ -44,6 +44,8 @@ function openBidders() {
           <button :class="{ on: route.name === 'Bidders' }" @click="openBidders()">
             지원 업체 <span class="n">{{ bidTotal }}</span>
           </button>
+          <!-- 공개 화면은 기관에게 '업체 찾기'입니다. 콘솔에서 들어가게 둡니다. -->
+          <button class="sub" @click="router.push('/home')">업체 찾기</button>
         </nav>
         <div class="cback"><button @click="router.push('/home')">← 공개 화면으로</button></div>
       </aside>
