@@ -26,3 +26,6 @@ vue-frontend/dist/
 *.pyc
 **/.venv/
 **/venv/
+
+# 시연 스크린샷·임시 산출물
+vue-frontend/vue-frontend.zip

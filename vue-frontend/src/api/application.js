@@ -1,0 +1,29 @@
+import api from './index.js'
+import { toPosting } from './posting.js'
+
+const unwrap = (res) => res.data?.data ?? res.data
+
+/** enrollment(백엔드) → application(우리 도메인) */
+export function toApplication(e) {
+  return {
+    id: e.id,
+    postingId: e.courseId,
+    userId: e.userId,
+    status: e.status,                       // PENDING | ACTIVE | CANCELLED
+    appliedAt: e.createdAt,
+    posting: e.course ? toPosting({ ...e.course, price: e.course.price }) : null
+  }
+}
+
+export const applicationApi = {
+  async mine() {
+    return (unwrap(await api.get('/api/enrollments/my')) ?? []).map(toApplication)
+  },
+  async byUser(userId) {
+    return (unwrap(await api.get(`/api/enrollments/user/${userId}`)) ?? []).map(toApplication)
+  },
+  /** 지원 → PENDING 즉시 반환. 확정은 Kafka 왕복 후이므로 폴링이 필요합니다. */
+  async apply(postingId) {
+    return toApplication(unwrap(await api.post('/api/enrollments', { courseId: postingId })))
+  }
+}

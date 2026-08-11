@@ -1,41 +1,31 @@
 import api from './index.js'
-import axios from 'axios'
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080'
+import { CLIENT_ID, CLIENT_SECRET, REDIRECT_URI } from '@/config.js'
 
 export const authApi = {
-  // OAuth2 Authorization Code -> Access Token 교환
-  // CLIENT_SECRET_BASIC: Authorization 헤더에 client_id:client_secret을 Base64로 인코딩
+  /* Authorization Code → Access Token 교환.
+     상대 경로라 개발에서는 vite 프록시, 운영에서는 nginx가
+     게이트웨이로 넘깁니다. 같은 출처를 쓰므로 CORS가 끼어들지 않습니다. */
   exchangeCode(code) {
-    const clientId = import.meta.env.VITE_CLIENT_ID
-    const clientSecret = import.meta.env.VITE_CLIENT_SECRET
-    const redirectUri = import.meta.env.VITE_REDIRECT_URI
-    const credentials = btoa(`${clientId}:${clientSecret}`)
-
+    const credentials = btoa(`${CLIENT_ID}:${CLIENT_SECRET}`)
     const body = new URLSearchParams({
       grant_type: 'authorization_code',
       code,
-      redirect_uri: redirectUri
+      redirect_uri: REDIRECT_URI
     })
 
-    return axios.post(
-      `${API_BASE_URL}/oauth2/token`,
-      body.toString(),
-      {
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-          'Authorization': `Basic ${credentials}`
-        }
+    return api.post('/oauth2/token', body.toString(), {
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        // CLIENT_SECRET_BASIC — client_id:client_secret 을 Base64로
+        Authorization: `Basic ${credentials}`
       }
-    )
+    })
   },
 
-  // 내 정보 조회
   getMe() {
     return api.get('/api/users/me')
   },
 
-  // 회원가입
   register(data) {
     return api.post('/api/users/register', data)
   }
