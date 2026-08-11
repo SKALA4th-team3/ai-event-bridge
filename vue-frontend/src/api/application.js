@@ -23,9 +23,9 @@ export const applicationApi = {
   async byUser(userId) {
     return (unwrap(await api.get(`/api/enrollments/user/${userId}`)) ?? []).map(toApplication)
   },
-  /** 지원은 공고(course)의 하위 리소스로 생성한다. */
+  /** 지원 생성은 Enrollment Service 경로로 요청한다. */
   async apply(courseId, { bidAmount, proposal } = {}) {
-    return toApplication(unwrap(await api.post(`/api/courses/${courseId}/enrollments`, {
+    return toApplication(unwrap(await api.post(`/api/enrollments/courses/${courseId}`, {
       bidAmount,
       proposal
     })))
