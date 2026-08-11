@@ -19,12 +19,14 @@ public class EnrollmentWriteService {
      * 반드시 독립 트랜잭션으로 실행
      */
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public Enrollment createPendingEnrollment(Long userId, Long courseId) {
+    public Enrollment createPendingEnrollment(Long userId, Long courseId, java.math.BigDecimal bidAmount, String proposal) {
 
         Enrollment enrollment = enrollmentRepository.save(
                 Enrollment.builder()
                         .userId(userId)
                         .courseId(courseId)
+                        .bidAmount(bidAmount)
+                        .proposal(proposal)
                         .build()
         );
 
