@@ -997,7 +997,7 @@
 .atabs em{font-style:normal;font-family:var(--f-mono);font-size:calc(var(--u)*.72);color:var(--tx3)}
 .atabs .on{background:var(--brand-bg);border-color:var(--brand-bd);color:var(--brand);font-weight:700}
 .atabs .on em{color:var(--brand)}
-.arow{grid-template-columns:minmax(0,1fr) 6.4em 5.4em 4.6em 8em 5.6em 7.4em}
+.arow{grid-template-columns:minmax(0,1fr) 6.4em 5.4em 5.4em 11em 5.6em 7.4em}
 .arow .doc{font-size:calc(var(--u)*.74);color:var(--tx2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .rowact{display:flex;gap:.3em;justify-content:flex-end}
 .rowact .btn{padding:.3em .6em;font-size:calc(var(--u)*.74)}
@@ -1066,3 +1066,8 @@
 .crumb button,.cback button,.linkbtn{min-height:26px;display:inline-flex;align-items:center}
 .ctop .bell{min-width:26px;min-height:26px;display:inline-grid;place-items:center}
 .eye{min-width:26px;min-height:26px;display:grid;place-items:center}
+
+/* 내 지원: 지원일 아래 마감을 함께 — 결과가 언제쯤인지 짐작할 단서 */
+.adate{display:flex;flex-direction:column;gap:.12em;color:var(--tx2)}
+.adate small{font-size:calc(var(--u)*.68);color:var(--tx3)}
+.adate small.hot{color:var(--brand);font-weight:700}
