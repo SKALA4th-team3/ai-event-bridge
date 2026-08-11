@@ -2,13 +2,19 @@
 <html lang="ko">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/png" href="/src/assets/images/logo/main_logo.png" />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Ccircle cx=%2712%27 cy=%2716%27 r=%279%27 fill=%27%23EA2A22%27/%3E%3Ccircle cx=%2721%27 cy=%2716%27 r=%279%27 fill=%27%23F59B14%27 fill-opacity=%27.85%27/%3E%3C/svg%3E" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>LearnNexus</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <title>이벤트브릿지 · 공공 이벤트 발주 매칭</title>
   </head>
+  <script>
+    // 계절은 접속 시점 기준으로 자동 결정합니다.
+    // 여기서 미리 심어 두지 않으면 첫 페인트가 기본색으로 한 번 깜빡입니다.
+    (function () {
+      var m = new Date().getMonth() + 1
+      document.documentElement.dataset.season =
+        m >= 3 && m <= 5 ? 'spring' : m >= 6 && m <= 8 ? 'summer' : m >= 9 && m <= 11 ? 'autumn' : 'winter'
+    })()
+  </script>
   <body>
     <div id="app"></div>
     <script type="module" src="/src/main.js"></script>
