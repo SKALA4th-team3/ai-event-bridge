@@ -34,10 +34,40 @@ const CONFIG = {
   projectId: env.VITE_FIREBASE_PROJECT_ID,
   appId: env.VITE_FIREBASE_APP_ID
 }
+/* App Check 는 선택이 아닙니다. 등록하지 않으면 호출이 403 으로 막힙니다:
+   "This AI Logic Project is inactive. Please complete onboarding and enable App Check"
+
+   공급자는 둘 중 하나입니다.
+     v3         — 일반 reCAPTCHA. google.com/recaptcha/admin 에서 무료로 만듭니다.
+                  GCP 결제 계정이 필요 없어 실습·데모에 맞습니다.
+     enterprise — reCAPTCHA Enterprise. GCP 에서 키를 만들며 결제 계정을 요구합니다. */
+const APPCHECK_SITE_KEY = env.VITE_FIREBASE_APPCHECK_SITE_KEY
+const APPCHECK_PROVIDER = (env.VITE_FIREBASE_APPCHECK_PROVIDER || 'v3').toLowerCase()
 export const aiConfigured = Object.values(CONFIG).every(Boolean)
 
 /* 같은 문장을 두 번 부르지 않습니다 — 무료 티어 한도를 아낍니다 */
 const cache = new Map()
+
+/* 설정을 맞추는 동안 무엇이 막았는지 보려고 마지막 오류를 남깁니다.
+   브라우저 콘솔: (await import('/src/lib/aiSearch.js')).lastError */
+export const state = { lastError: null }
+
+/* App Check — 이 앱에서 온 호출임을 증명합니다.
+   개발 중에는 reCAPTCHA 를 통과할 수 없으므로 디버그 토큰을 씁니다.
+   FIREBASE_APPCHECK_DEBUG_TOKEN 을 true 로 두면 브라우저 콘솔에 UUID 가
+   찍히고, 그 값을 Firebase 콘솔의 '디버그 토큰 관리'에 등록하면 됩니다. */
+let appCheckDone = false
+async function setupAppCheck(app) {
+  if (appCheckDone || !APPCHECK_SITE_KEY) return
+  appCheckDone = true
+  const { initializeAppCheck, ReCaptchaV3Provider, ReCaptchaEnterpriseProvider } =
+    await import('firebase/app-check')
+  if (import.meta.env.DEV) self.FIREBASE_APPCHECK_DEBUG_TOKEN = true
+  const provider = APPCHECK_PROVIDER === 'enterprise'
+    ? new ReCaptchaEnterpriseProvider(APPCHECK_SITE_KEY)
+    : new ReCaptchaV3Provider(APPCHECK_SITE_KEY)
+  initializeAppCheck(app, { provider, isTokenAutoRefreshEnabled: true })
+}
 
 let modelPromise = null
 async function getModel() {
@@ -47,12 +77,17 @@ async function getModel() {
     const { initializeApp } = await import('firebase/app')
     const { getAI, getGenerativeModel, GoogleAIBackend, Schema } = await import('firebase/ai')
 
-    const ai = getAI(initializeApp(CONFIG), { backend: new GoogleAIBackend() })
+    const app = initializeApp(CONFIG)
+    await setupAppCheck(app)
+    const ai = getAI(app, { backend: new GoogleAIBackend() })
 
     /* 고를 수 있는 값은 우리 축뿐입니다 */
+    /* enum 에 빈 문자열을 넣으면 400 입니다 ("enum[0]: cannot be empty").
+       '해당 없음'은 값이 아니라 항목을 비우는 것으로 나타냅니다. */
     const responseSchema = Schema.object({
+      optionalProperties: ['period', 'text'],
       properties: {
-        period: Schema.enumString({ enum: ['', ...PERIODS] }),
+        period: Schema.enumString({ enum: PERIODS }),
         regions: Schema.array({ items: Schema.enumString({ enum: REGION_GROUPS }) }),
         categories: Schema.array({ items: Schema.enumString({ enum: CATEGORIES.map((c) => c.label) }) }),
         budgets: Schema.array({ items: Schema.enumString({ enum: BUDGET_BANDS.map((b) => b.label) }) }),
@@ -79,10 +114,34 @@ const PROMPT = `너는 공공 이벤트 발주 공고 검색창의 검색어 해
 
 규칙
 1. 문장에 근거가 없는 축은 비워 둔다. 짐작해서 채우지 않는다.
-2. 축으로 옮길 수 없는 말(축제 이름 등)만 text 에 넣는다. 없으면 빈 문자열.
+2. text 에는 고유명사만 넣는다 — 축제·행사 이름, 기관 이름, 지명.
+   '돈 되는', '괜찮은', '일감' 같은 꾸밈말이나 일반 명사는 넣지 않는다.
+   넣을 고유명사가 없으면 text 는 비운다.
+   ※ text 는 공고 제목에서 그대로 찾는 데 쓰이므로,
+     제목에 없을 말을 넣으면 결과가 0건이 된다.
 3. 값은 주어진 목록에서만 고른다.
 
 검색어: `
+
+/* 설정이 제대로 붙었는지, 어떤 모델 ID 가 사는지 확인하는 용도입니다.
+   브라우저 콘솔에서:
+     const m = await import('/src/lib/aiSearch.js'); await m.probeModel('gemini-2.5-flash')
+   모델 ID 는 버전이 자주 오르므로 콘솔 문서보다 직접 불러 보는 편이 확실합니다. */
+export async function probeModel(modelId) {
+  if (!aiConfigured) return { ok: false, reason: '.env 에 VITE_FIREBASE_* 값이 없습니다' }
+  try {
+    const { initializeApp, getApps } = await import('firebase/app')
+    const { getAI, getGenerativeModel, GoogleAIBackend } = await import('firebase/ai')
+    const app = getApps()[0] || initializeApp(CONFIG)
+    await setupAppCheck(app)
+    const ai = getAI(app, { backend: new GoogleAIBackend() })
+    const m = getGenerativeModel(ai, { model: modelId })
+    const r = await m.generateContent('한 단어로만 답해: 하늘은 무슨 색?')
+    return { ok: true, answer: r.response.text().trim() }
+  } catch (e) {
+    return { ok: false, reason: e.message || String(e) }
+  }
+}
 
 /** 문장 → { period, regions, categories, budgets, text } · 실패하면 null */
 export async function analyzeQuery(text) {
@@ -92,16 +151,18 @@ export async function analyzeQuery(text) {
 
   try {
     const model = await getModel()
-    /* 응답이 늦으면 기다리지 않고 규칙 파서로 넘어갑니다 */
+    /* 응답이 늦으면 기다리지 않고 규칙 파서로 넘어갑니다.
+       실측 2.7~5.1초라 6초는 아슬아슬해 여유를 둡니다. */
     const res = await Promise.race([
       model.generateContent(PROMPT + q),
-      new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 6000))
+      new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 9000))
     ])
     const out = JSON.parse(res.response.text())
     cache.set(q, out)
     return out
   } catch (e) {
-    console.warn('[aiSearch] 해석에 실패해 규칙 파서로 넘어갑니다:', e.message)
+    state.lastError = e?.message || String(e)
+    console.warn('[aiSearch] 해석에 실패해 규칙 파서로 넘어갑니다:', state.lastError)
     return null
   }
 }
