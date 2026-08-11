@@ -258,12 +258,41 @@ VITE_FIREBASE_API_KEY=
 VITE_FIREBASE_AUTH_DOMAIN=
 VITE_FIREBASE_PROJECT_ID=
 VITE_FIREBASE_APP_ID=
-VITE_GEMINI_MODEL=      # 콘솔이 안내하는 Flash 계열 모델 ID
+VITE_FIREBASE_APPCHECK_PROVIDER=v3
+VITE_FIREBASE_APPCHECK_SITE_KEY=
+VITE_GEMINI_MODEL=gemini-flash-latest
 ```
 
-4. **App Check를 켜세요.** 위 네 값은 비밀키가 아니라 공개 식별자라
-   (웹 앱 번들에 원래 노출됩니다) 호출 권한은 App Check가 통제합니다.
+4. **App Check는 필수입니다.** 없으면 호출이 403으로 막힙니다
+   (`This AI Logic Project is inactive`). 위 네 값은 비밀키가 아니라
+   공개 식별자라 호출 권한을 App Check가 통제합니다.
    Gemini API 키는 브라우저 코드에 들어가지 않습니다.
+
+   - **reCAPTCHA v3** 를 쓰면 GCP 결제 계정이 필요 없습니다.
+     https://www.google.com/recaptcha/admin 에서 v3 키 생성 → 도메인에 `localhost`
+     → **비밀 키**는 Firebase App Check 콘솔에, **사이트 키**는 위 `.env` 에.
+   - reCAPTCHA Enterprise 를 쓰려면 `VITE_FIREBASE_APPCHECK_PROVIDER=enterprise`.
+
+5. **로컬 개발은 디버그 토큰이 필요합니다.** `npm run dev` 로 띄우고 검색을
+   한 번 하면 브라우저 콘솔에 `App Check debug token: <UUID>` 가 찍힙니다.
+   그 값을 Firebase Console → App Check → 앱 → ⋮ → **디버그 토큰 관리** 에 등록하세요.
+   (`import.meta.env.DEV` 일 때만 켜지므로 빌드 산출물에는 들어가지 않습니다)
+
+### 막혔을 때
+
+브라우저 콘솔에서 마지막 오류와 모델 확인:
+
+```js
+const m = await import('/src/lib/aiSearch.js')
+m.state.lastError            // 마지막 실패 원인
+await m.probeModel('gemini-flash-latest')   // 이 모델 ID 가 사는지
+```
+
+| 증상 | 원인 |
+|---|---|
+| `403 This AI Logic Project is inactive` | AI Logic 온보딩 미완료 또는 디버그 토큰 미등록 |
+| `404 no longer available to new users` | 모델 ID 가 만료됨 — `probeModel` 로 다른 ID 확인 |
+| `400 enum[0]: cannot be empty` | 스키마 enum 에 빈 문자열 |
 
 > AI가 고를 수 있는 값은 `Schema.enumString` 으로 우리 축의 라벨에 묶여 있습니다.
 > '부스설치'처럼 한 글자 다른 값이 와서 조용히 0건이 되는 일을 막습니다.
