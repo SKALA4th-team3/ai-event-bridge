@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1120" viewBox="0 0 1800 1120">
+  <defs>
+    <linearGradient id="bg" x1="0" x2="0" y1="0" y2="1"><stop stop-color="#f8fbff"/><stop offset="1" stop-color="#eef4fb"/></linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="150%"><feDropShadow dx="0" dy="5" stdDeviation="8" flood-color="#1e3a5f" flood-opacity=".13"/></filter>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10z" fill="#5d7085"/></marker>
+    <marker id="eventArrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10z" fill="#a45c14"/></marker>
+    <style>
+      text { font-family: -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Noto Sans KR', Arial, sans-serif; fill:#172b45 }
+      .title { font-size:38px; font-weight:800; letter-spacing:-1px }
+      .subtitle { font-size:17px; fill:#64748b }
+      .zone { fill:#ffffff; stroke:#cbd9e8; stroke-width:2; stroke-dasharray:8 7 }
+      .zone-title { font-size:16px; font-weight:800; fill:#52708f; letter-spacing:1px }
+      .box { stroke-width:2; filter:url(#shadow) }
+      .name { font-size:22px; font-weight:800; text-anchor:middle }
+      .detail { font-size:14px; fill:#5f7184; text-anchor:middle }
+      .port { font-size:13px; font-weight:700; text-anchor:middle }
+      .line { fill:none; stroke:#5d7085; stroke-width:2.5; marker-end:url(#arrow) }
+      .dashed { stroke-dasharray:7 6 }
+      .event { fill:none; stroke:#b86b16; stroke-width:3; stroke-dasharray:8 6; marker-end:url(#eventArrow) }
+      .label { font-size:13px; font-weight:700; fill:#5d7085; text-anchor:middle }
+      .event-label { font-size:13px; font-weight:800; fill:#a45c14; text-anchor:middle }
+    </style>
+  </defs>
+  <rect width="1800" height="1120" fill="url(#bg)"/>
+  <text x="80" y="72" class="title">AI Event Bridge · MSA Architecture</text>
+  <text x="80" y="104" class="subtitle">Docker Compose / lecture-net · Vue 기반 공고·입찰 플랫폼 런타임 구성</text>
+
+  <rect x="70" y="145" width="1660" height="160" rx="24" class="zone"/>
+  <text x="96" y="180" class="zone-title">CLIENT LAYER</text>
+  <rect x="170" y="196" width="280" height="74" rx="14" fill="#e2f0ff" stroke="#3182ce" class="box"/>
+  <text x="310" y="228" class="name">Web Browser</text><text x="310" y="252" class="detail">사용자 · 관리자 · 기업</text>
+  <rect x="700" y="196" width="340" height="74" rx="14" fill="#e7f8f0" stroke="#269669" class="box"/>
+  <text x="870" y="228" class="name">Vue Frontend</text><text x="870" y="252" class="detail">Vite · Pinia · Vue Router · :3000</text>
+  <path d="M450 233 H694" class="line"/><text x="572" y="220" class="label">HTTPS</text>
+
+  <rect x="70" y="340" width="1660" height="185" rx="24" class="zone"/>
+  <text x="96" y="375" class="zone-title">EDGE &amp; IDENTITY</text>
+  <rect x="410" y="398" width="340" height="82" rx="14" fill="#eee9ff" stroke="#7655c9" class="box"/>
+  <text x="580" y="431" class="name">API Gateway</text><text x="580" y="456" class="detail">라우팅 · JWT 검증 · :8080</text>
+  <rect x="1040" y="398" width="340" height="82" rx="14" fill="#fff1e6" stroke="#df7b2b" class="box"/>
+  <text x="1210" y="431" class="name">Auth Server</text><text x="1210" y="456" class="detail">OAuth2 / JWK · :9000</text>
+  <path d="M870 270 V360 H580 V392" class="line"/><text x="711" y="348" class="label">REST API</text>
+  <path d="M870 270 V360 H1210 V392" class="line"/><text x="1040" y="348" class="label">로그인 · 토큰</text>
+  <path d="M750 439 H1034" class="line"/><text x="892" y="426" class="label">JWK 검증</text>
+
+  <rect x="70" y="560" width="1660" height="290" rx="24" class="zone"/>
+  <text x="96" y="595" class="zone-title">MICROSERVICES</text>
+  <rect x="135" y="635" width="245" height="100" rx="14" fill="#e8f4ff" stroke="#3182ce" class="box"/>
+  <text x="258" y="673" class="name">User Service</text><text x="258" y="698" class="detail">사용자 · 프로필</text><text x="258" y="720" class="port">:8081</text>
+  <rect x="450" y="635" width="245" height="100" rx="14" fill="#e8f4ff" stroke="#3182ce" class="box"/>
+  <text x="573" y="673" class="name">Course Service</text><text x="573" y="698" class="detail">공고 / 강의 관리</text><text x="573" y="720" class="port">:8082</text>
+  <rect x="765" y="635" width="245" height="100" rx="14" fill="#e8f4ff" stroke="#3182ce" class="box"/>
+  <text x="888" y="673" class="name">Enrollment Service</text><text x="888" y="698" class="detail">신청 · 수강 활성화</text><text x="888" y="720" class="port">:8083</text>
+  <rect x="1080" y="635" width="245" height="100" rx="14" fill="#e8f4ff" stroke="#3182ce" class="box"/>
+  <text x="1203" y="673" class="name">Payment Service</text><text x="1203" y="698" class="detail">결제 처리</text><text x="1203" y="720" class="port">:8084</text>
+  <rect x="1395" y="635" width="245" height="100" rx="14" fill="#dff7ef" stroke="#20946a" class="box"/>
+  <text x="1518" y="673" class="name">Recommend Service</text><text x="1518" y="698" class="detail">FastAPI · AI 추천</text><text x="1518" y="720" class="port">:8085</text>
+  <path d="M580 480 V605 H258 V629" class="line"/><path d="M580 480 V629" class="line"/><path d="M580 480 V605 H888 V629" class="line"/><path d="M580 480 V605 H1203 V629" class="line"/><path d="M580 480 V605 H1518 V629" class="line"/>
+  <path d="M765 685 H701" class="line"/><text x="733" y="673" class="label">동기 REST</text>
+  <path d="M1395 705 H1020" class="line dashed"/><path d="M1395 720 H701" class="line dashed"/><text x="1205" y="752" class="label">내부 REST 조회</text>
+
+  <rect x="70" y="885" width="1660" height="170" rx="24" class="zone"/>
+  <text x="96" y="920" class="zone-title">PLATFORM SERVICES</text>
+  <rect x="210" y="950" width="285" height="70" rx="14" fill="#fff4db" stroke="#cc8a18" class="box"/>
+  <text x="352" y="980" class="name">MariaDB</text><text x="352" y="1004" class="detail">공유 개발 DB · :3379</text>
+  <rect x="760" y="950" width="285" height="70" rx="14" fill="#fff0e5" stroke="#d66b17" class="box"/>
+  <text x="902" y="980" class="name">Kafka</text><text x="902" y="1004" class="detail">이벤트 브로커 · :9092</text>
+  <rect x="1310" y="950" width="285" height="70" rx="14" fill="#f0eaff" stroke="#7655c9" class="box"/>
+  <text x="1452" y="980" class="name">Eureka Server</text><text x="1452" y="1004" class="detail">서비스 디스커버리 · :8761</text>
+  <path d="M258 735 V900 H352 V944" class="line dashed"/><path d="M573 735 V900 H352 V944" class="line dashed"/><path d="M888 735 V900 H352 V944" class="line dashed"/><path d="M1203 735 V900 H352 V944" class="line dashed"/><text x="525" y="884" class="label">데이터 저장</text>
+  <path d="M1203 735 V900 H902 V944" class="event"/><text x="1052" y="882" class="event-label">payment.completed</text>
+  <path d="M902 944 V875 H888 V741" class="event"/><text x="805" y="866" class="event-label">결제 완료 수신</text>
+  <path d="M888 735 V875 H902 V944" class="event"/><text x="975" y="866" class="event-label">enrollment.completed</text>
+  <path d="M902 944 V875 H1518 V741" class="event"/><text x="1220" y="866" class="event-label">추천 캐시 갱신</text>
+  <path d="M580 480 V910 H1452 V944" class="line dashed"/><path d="M1210 480 V910 H1452 V944" class="line dashed"/><path d="M258 735 V910 H1452 V944" class="line dashed"/><path d="M573 735 V910 H1452 V944" class="line dashed"/><path d="M888 735 V910 H1452 V944" class="line dashed"/><path d="M1203 735 V910 H1452 V944" class="line dashed"/><path d="M1518 735 V910 H1452 V944" class="line dashed"/>
+  <rect x="80" y="1074" width="14" height="5" rx="2" fill="#5d7085"/><text x="104" y="1081" class="detail" text-anchor="start">동기 HTTP / 서비스 등록</text>
+  <rect x="390" y="1074" width="14" height="5" rx="2" fill="#b86b16"/><text x="414" y="1081" class="detail" text-anchor="start">Kafka 비동기 이벤트</text>
+</svg>

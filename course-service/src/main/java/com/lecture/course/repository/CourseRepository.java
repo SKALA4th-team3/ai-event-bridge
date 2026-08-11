@@ -16,10 +16,13 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
     // 활성 강의 전체 조회
     List<Course> findByStatus(Course.Status status);
 
+    List<Course> findByStatusIn(List<Course.Status> statuses);
+
     // 카테고리별 + 특정 ID 제외 조회 (추천 서비스: 이미 수강한 강의 제외)
     List<Course> findByCategoryAndStatusAndIdNotIn(
             Course.Category category,
             Course.Status status,
             List<Long> excludeIds
     );
+
 }

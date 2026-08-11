@@ -47,7 +47,7 @@ public class Course {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     @Builder.Default
-    private Status status = Status.ACTIVE;
+    private Status status = Status.DRAFT;
 
     @CreatedDate
     @Column(updatable = false)
@@ -61,10 +61,23 @@ public class Course {
     }
 
     public enum Status {
+        DRAFT, PUBLISHED, OPEN, CLOSED, AWARDED, COMPLETED, CANCELLED,
+        /* 기존 courses 테이블 데이터 호환용 */
         ACTIVE, INACTIVE
     }
 
     public void increaseEnrollmentCount() {
         this.enrollmentCount++;
+    }
+
+    public void update(String title, String description, Category category, BigDecimal price) {
+        this.title = title;
+        this.description = description;
+        this.category = category;
+        this.price = price;
+    }
+
+    public void changeStatus(Status status) {
+        this.status = status;
     }
 }

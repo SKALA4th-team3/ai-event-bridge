@@ -7,6 +7,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
+import java.math.BigDecimal;
 
 @Entity
 @Table(name = "enrollments",
@@ -28,10 +29,16 @@ public class Enrollment {
     @Column(name = "course_id", nullable = false)
     private Long courseId;
 
+    @Column(precision = 15, scale = 2)
+    private BigDecimal bidAmount;
+
+    @Column(columnDefinition = "TEXT")
+    private String proposal;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     @Builder.Default
-    private Status status = Status.PENDING;
+    private Status status = Status.SUBMITTED;
 
     @CreatedDate
     @Column(updatable = false)
@@ -41,9 +48,9 @@ public class Enrollment {
     private LocalDateTime updatedAt;
 
     public enum Status {
-        PENDING,   // 수강신청 완료, 결제 대기
-        ACTIVE,    // 결제 완료, 수강 활성화
-        CANCELLED  // 취소
+        SUBMITTED, UNDER_REVIEW, AWARDED, NOT_AWARDED, WITHDRAWN,
+        /* 이전 결제 기반 흐름과의 데이터 호환용 */
+        PENDING, ACTIVE, CANCELLED
     }
 
     public void activate() {
@@ -51,6 +58,11 @@ public class Enrollment {
     }
 
     public void cancel() {
-        this.status = Status.CANCELLED;
+        this.status = Status.WITHDRAWN;
+    }
+
+    public void update(BigDecimal bidAmount, String proposal) {
+        this.bidAmount = bidAmount;
+        this.proposal = proposal;
     }
 }

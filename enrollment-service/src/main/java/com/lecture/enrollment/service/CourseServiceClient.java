@@ -22,7 +22,7 @@ public class CourseServiceClient {
         try {
             Boolean exists = webClientBuilder.build()
                     .get()
-                    .uri("http://course-service/api/courses/internal/exists/{id}", courseId)
+                    .uri("http://course-service/api/courses/internal/exists/{courseId}", courseId)
                     .retrieve()
                     .bodyToMono(Boolean.class)
                     .block();
@@ -38,13 +38,13 @@ public class CourseServiceClient {
     /**
      * Course Service: 강의 상세 조회
      * - 내 수강 목록 응답에 course 정보를 붙일 때 사용
-     * - course-service 쪽에 GET /api/courses/internal/{id} 엔드포인트가 있어야 함
+     * - course-service 쪽에 GET /api/courses/internal/{courseId} 엔드포인트가 있어야 함
      */
     public Map<String, Object> getCourse(Long courseId) {
         try {
             Map<String, Object> responseBody = webClientBuilder.build()
                     .get()
-                    .uri("http://course-service/api/courses/internal/{id}", courseId)
+                    .uri("http://course-service/api/courses/internal/{courseId}", courseId)
                     .retrieve()
                     .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {})
                     .block();
@@ -95,7 +95,7 @@ public class CourseServiceClient {
         try {
             webClientBuilder.build()
                     .post()
-                    .uri("http://course-service/api/courses/internal/{id}/enrollment-count", courseId)
+                    .uri("http://course-service/api/courses/internal/{courseId}/enrollment-count", courseId)
                     .retrieve()
                     .toBodilessEntity()
                     .block();

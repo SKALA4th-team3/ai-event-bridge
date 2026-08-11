@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.math.BigDecimal;
 import java.util.List;
 
 public class EnrollmentDto {
@@ -17,6 +18,29 @@ public class EnrollmentDto {
     public static class EnrollRequest {
         @NotNull(message = "강의 ID는 필수입니다")
         private Long courseId;
+
+        private BigDecimal bidAmount;
+        private String proposal;
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class UpdateRequest {
+        @NotNull(message = "입찰 금액은 필수입니다")
+        private BigDecimal bidAmount;
+        private String proposal;
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class ApplyRequest {
+        @NotNull(message = "입찰 금액은 필수입니다")
+        private BigDecimal bidAmount;
+        private String proposal;
     }
 
     // 강의 요약 정보 (내 수강 목록 표시용)
@@ -44,6 +68,8 @@ public class EnrollmentDto {
         private Long id;
         private Long userId;
         private Long courseId;
+        private BigDecimal bidAmount;
+        private String proposal;
         private Enrollment.Status status;
         private LocalDateTime createdAt;
 
@@ -55,6 +81,8 @@ public class EnrollmentDto {
                     .id(enrollment.getId())
                     .userId(enrollment.getUserId())
                     .courseId(enrollment.getCourseId())
+                    .bidAmount(enrollment.getBidAmount())
+                    .proposal(enrollment.getProposal())
                     .status(enrollment.getStatus())
                     .createdAt(enrollment.getCreatedAt())
                     .build();
@@ -65,6 +93,8 @@ public class EnrollmentDto {
                     .id(enrollment.getId())
                     .userId(enrollment.getUserId())
                     .courseId(enrollment.getCourseId())
+                    .bidAmount(enrollment.getBidAmount())
+                    .proposal(enrollment.getProposal())
                     .status(enrollment.getStatus())
                     .createdAt(enrollment.getCreatedAt())
                     .course(course)
