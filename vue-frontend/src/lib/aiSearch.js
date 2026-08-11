@@ -43,7 +43,12 @@ const TEAM = {
   projectId: 'ai-event-bridge',
   appId: '1:973186344892:web:594e2a59854eb299a22db9',
   appCheckSiteKey: '6LfYJIAtAAAAAJvOAut8WAydd59l1VFG3bAIWpi7',
-  model: 'gemini-flash-latest'
+  /* 무료 티어는 모델마다 하루 요청 수가 따로 잡힙니다.
+     gemini-flash-latest 는 최신 모델로 풀리며 하루 20회였습니다
+     ("limit: 20, model: gemini-3.6-flash"). 팀이 한 프로젝트를 공유하면
+     금세 바닥납니다. 우리가 시키는 일은 문장에서 조건을 뽑는 것뿐이라
+     lite 로 충분하고, 쿼터 버킷도 따로 씁니다. */
+  model: 'gemini-flash-lite-latest'
 }
 
 /* App Check 디버그 토큰.
@@ -76,8 +81,17 @@ const APPCHECK_SITE_KEY = env.VITE_FIREBASE_APPCHECK_SITE_KEY || TEAM.appCheckSi
 const APPCHECK_PROVIDER = (env.VITE_FIREBASE_APPCHECK_PROVIDER || 'v3').toLowerCase()
 export const aiConfigured = Object.values(CONFIG).every(Boolean)
 
-/* 같은 문장을 두 번 부르지 않습니다 — 무료 티어 한도를 아낍니다 */
-const cache = new Map()
+/* 같은 문장을 두 번 부르지 않습니다 — 무료 티어 한도를 아낍니다.
+   하루 한도가 빠듯해서 새로고침해도 남도록 localStorage 에 둡니다.
+   시연에서 같은 문장을 반복해도 호출은 한 번뿐입니다. */
+const CACHE_KEY = 'eb.aiQueryCache'
+const cache = new Map(
+  (() => { try { return JSON.parse(localStorage.getItem(CACHE_KEY) || '[]') } catch { return [] } })()
+)
+const saveCache = () => {
+  /* 오래된 것부터 버려 200개만 유지합니다 */
+  try { localStorage.setItem(CACHE_KEY, JSON.stringify([...cache].slice(-200))) } catch { /* 용량 초과는 무시 */ }
+}
 
 /* 설정을 맞추는 동안 무엇이 막았는지 보려고 마지막 오류를 남깁니다.
    브라우저 콘솔: (await import('/src/lib/aiSearch.js')).lastError */
@@ -146,9 +160,11 @@ const PROMPT = `너는 공공 이벤트 발주 공고 검색창의 검색어 해
 
 규칙
 1. 문장에 근거가 없는 축은 비워 둔다. 짐작해서 채우지 않는다.
-2. text 에는 고유명사만 넣는다 — 축제·행사 이름, 기관 이름, 지명.
-   '돈 되는', '괜찮은', '일감' 같은 꾸밈말이나 일반 명사는 넣지 않는다.
-   넣을 고유명사가 없으면 text 는 비운다.
+2. text 에는 축제·행사 이름이나 기관 이름만 넣는다.
+   지명은 넣지 않는다 — 지역은 위의 '지역' 축이 이미 맡는다.
+   ('제주에서 케이터링' → 지역만 채우고 text 는 비운다)
+   '돈 되는', '괜찮은', '일감' 같은 꾸밈말이나 일반 명사도 넣지 않는다.
+   넣을 이름이 없으면 text 는 비운다.
    ※ text 는 공고 제목에서 그대로 찾는 데 쓰이므로,
      제목에 없을 말을 넣으면 결과가 0건이 된다.
 3. 값은 주어진 목록에서만 고른다.
@@ -175,6 +191,13 @@ export async function probeModel(modelId) {
   }
 }
 
+/* 첫 호출에는 firebase 모듈 로드와 App Check 악수가 함께 얹혀 7~8초가 걸립니다.
+   두 번째부터는 3~4초입니다. 검색창에 손이 닿을 때 미리 준비해 두면
+   실제 호출은 왕복 시간만 남습니다. 실패해도 조용히 넘어갑니다. */
+export function warmUp() {
+  if (aiConfigured) getModel().catch(() => {})
+}
+
 /** 문장 → { period, regions, categories, budgets, text } · 실패하면 null */
 export async function analyzeQuery(text) {
   const q = text.trim()
@@ -191,6 +214,7 @@ export async function analyzeQuery(text) {
     ])
     const out = JSON.parse(res.response.text())
     cache.set(q, out)
+    saveCache()
     return out
   } catch (e) {
     state.lastError = e?.message || String(e)

@@ -3,7 +3,7 @@ import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import KoreaMap from '@/components/public/KoreaMap.vue'
 import { parseQuery, conditionsToFilters, SAMPLE_QUERIES } from '@/composables/useQueryParser.js'
-import { analyzeQuery, toConditions, aiConfigured } from '@/lib/aiSearch.js'
+import { analyzeQuery, toConditions, aiConfigured, warmUp } from '@/lib/aiSearch.js'
 import { recommendFor } from '@/composables/useFitScore.js'
 import { applyFilters } from '@/composables/useFilters.js'
 import { won, wonShort, ddayLabel, isUrgent } from '@/composables/useFormat.js'
@@ -50,25 +50,40 @@ const regionsPicked = computed(() =>
 /* 칩을 목록에 적용했을 때 몇 건이 남는지 — 스토어를 건드리지 않고 계산합니다 */
 const hitCount = computed(() => applyFilters(posting.scored, conditionsToFilters(st.value)).length)
 /* 문장을 조건으로 옮깁니다.
-   AI 가 설정돼 있으면 AI 가, 아니면(또는 실패하면) 규칙 파서가 맡습니다.
-   어느 쪽이든 결과를 고르는 건 applyFilters 라, 없는 공고가 섞이지 않습니다. */
+
+   규칙 파서 결과를 먼저 보여 주고, AI 응답이 오면 갈아 끼웁니다.
+   Gemini 응답이 3~8초라 기다리게 하면 검색이 멈춘 것처럼 보입니다.
+   먼저 보여 주는 값도 쓸 만하고, 잠시 뒤 더 나은 해석으로 바뀝니다. */
 const thinking = ref(false)
+let seq = 0
+
 async function search() {
   const text = q.value.trim()
   if (!text) return
+
+  const mine = ++seq
+  st.value = parseQuery(text)
+  ui.toast(
+    st.value.length ? `조건 ${st.value.length}개를 읽었습니다.`
+                    : '조건을 찾지 못했습니다. 지역·분야·기간을 넣어 보세요.',
+    st.value.length ? 'info' : 'bad',
+    'search'
+  )
+  if (!aiConfigured) return
+
   thinking.value = true
   try {
-    const ai = aiConfigured ? await analyzeQuery(text) : null
-    st.value = ai ? toConditions(ai) : parseQuery(text)
-    ui.toast(
-      st.value.length
-        ? `조건 ${st.value.length}개를 읽었습니다.${ai ? '' : ''}`
-        : '조건을 찾지 못했습니다. 지역·분야·기간을 넣어 보세요.',
-      st.value.length ? 'info' : 'bad',
-      'search'
-    )
+    const ai = await analyzeQuery(text)
+    /* 그새 다른 검색을 했으면 늦게 온 응답은 버립니다 */
+    if (mine !== seq) return
+    const refined = ai ? toConditions(ai) : []
+    if (refined.length) {
+      const changed = JSON.stringify(refined) !== JSON.stringify(st.value)
+      st.value = refined
+      if (changed) ui.toast(`조건 ${refined.length}개로 다시 읽었습니다.`, 'info', 'search')
+    }
   } finally {
-    thinking.value = false
+    if (mine === seq) thinking.value = false
   }
 }
 function pickSample(s) { q.value = s; st.value = parseQuery(s) }
@@ -231,13 +246,13 @@ onEscape(() => { firm2.value = null })
 
         <form class="searchbar" @submit.prevent="search">
           <span class="ico">✦</span>
-          <input v-model="q" aria-label="공고 검색" autocomplete="off" :disabled="thinking">
-          <button type="submit" class="btn pri" :disabled="thinking">{{ thinking ? '읽는 중…' : '찾기' }}</button>
+          <input v-model="q" aria-label="공고 검색" autocomplete="off" @focus="warmUp()">
+          <button type="submit" class="btn pri">찾기</button>
         </form>
 
         <div class="parsed" aria-live="polite">
           <template v-if="st.length">
-            <span class="parsed-label">읽어낸 조건</span>
+            <span class="parsed-label">읽어낸 조건<em v-if="thinking" class="refining">AI가 다시 읽는 중…</em></span>
             <span v-for="c in st" :key="c.key + c.value" class="chip">
               <span>{{ c.key === '지역그룹' ? '지역' : c.key }} · {{ c.value }}</span>
               <button class="x" type="button" :aria-label="`${c.value} 조건 지우기`" @click="dropChip(c)">✕</button>

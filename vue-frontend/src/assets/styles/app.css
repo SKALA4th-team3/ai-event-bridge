@@ -1180,3 +1180,6 @@
 
 /* 콘솔 상단 로그아웃 — 어두운 바 위라 밝은 테두리로 */
 .ctop .cout{margin-left:.55em;padding:.32em .7em;min-height:26px;font-size:calc(var(--u)*.74)}
+
+/* 규칙 파서 결과를 먼저 보여 준 뒤 AI 응답을 기다리는 중임을 알립니다 */
+.parsed-label .refining{margin-left:.45em;font-style:normal;font-size:.9em;color:var(--brand);opacity:.85}
