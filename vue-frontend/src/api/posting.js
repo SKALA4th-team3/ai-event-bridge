@@ -69,7 +69,7 @@ export function toPosting(c) {
     orgName: section(desc, '기관') || '발주 기관',
     location: loc,
     region: toGroup(loc.split(' ')[0]),
-    bidderCount: c.enrollmentCount ?? 0,
+    bidderCount: Number(c.enrollmentCount) || 0,
     deadline,
     /* 계절은 '언제 열리는 축제인가'로 판정합니다.
        입찰 마감은 행사보다 두어 달 앞서므로 마감월로 재면 어긋납니다. */

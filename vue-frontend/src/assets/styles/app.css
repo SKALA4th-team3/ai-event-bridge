@@ -997,6 +997,8 @@
 .atabs em{font-style:normal;font-family:var(--f-mono);font-size:calc(var(--u)*.72);color:var(--tx3)}
 .atabs .on{background:var(--brand-bg);border-color:var(--brand-bd);color:var(--brand);font-weight:700}
 .atabs .on em{color:var(--brand)}
+/* 위쪽 #app 안의 .arow 는 6열 기준입니다. '제출 서류'가 늘면서 7열이 되었고,
+   열 폭은 여기서 정합니다 — 위를 고쳐도 반영되지 않으니 이 줄을 보세요. */
 .arow{grid-template-columns:minmax(0,1fr) 6.4em 5.4em 5.4em 11em 5.6em 7.4em}
 .arow .doc{font-size:calc(var(--u)*.74);color:var(--tx2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .rowact{display:flex;gap:.3em;justify-content:flex-end}
