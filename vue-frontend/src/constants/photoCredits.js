@@ -10,5 +10,9 @@ export const PHOTO_CREDITS = [
   { name: '강릉 단오제', author: 'Korea.net / Korean Culture and Information Service (Jeon Han', license: 'CC BY-SA 2.0', source: 'https://commons.wikimedia.org/wiki/File%3AKorea_Gangneung_Danoje_Festival_03_%2814323857531%29.jpg' },
   { name: '진주 남강유등축제', author: 'hyolee2', license: 'CC BY-SA 3.0', source: 'https://commons.wikimedia.org/wiki/File%3A2015_Jinju_Namgang_Yudeung_Festival_11.JPG' },
   { name: '부산 광안리 불꽃축제', author: 'RedMosQ', license: 'CC BY-SA 2.0 kr', source: 'https://commons.wikimedia.org/wiki/File%3A2008_Busan_Firework_Festival--Firework1.JPG' },
-  { name: '부산 바다축제', author: 'RonanHoogmoed', license: 'CC BY-SA 4.0', source: 'https://commons.wikimedia.org/wiki/File%3AAvatar_The_Way_of_Water_sand_art_on_Haeundae_Beach.jpg' }
+  { name: '부산 바다축제', author: 'RonanHoogmoed', license: 'CC BY-SA 4.0', source: 'https://commons.wikimedia.org/wiki/File%3AAvatar_The_Way_of_Water_sand_art_on_Haeundae_Beach.jpg' },
+  { name: '화천 산천어축제', author: 'Republic of  Korea from Seoul, Republic of Korea', license: 'CC BY-SA 2.0', source: 'https://commons.wikimedia.org/wiki/File%3AHwacheon_Sancheoneo_Ice_Festival_01_%2852620586388%29.jpg' },
+  { name: '태백산 눈축제', author: '칼빈500', license: 'CC BY-SA 3.0', source: 'https://commons.wikimedia.org/wiki/File%3A%ED%83%9C%EB%B0%B1%EC%82%B0_%EB%88%88%EC%B6%95%EC%A0%9C%28AMJ%29.jpg' },
+  { name: '이천 쌀문화축제', author: '윤성은01', license: 'CC BY-SA 4.0', source: 'https://commons.wikimedia.org/wiki/File%3AIceon_rice_festival_1.jpg' },
+  { name: '대전 사이언스페스티벌', author: 'Trainholic', license: 'CC BY-SA 4.0', source: 'https://commons.wikimedia.org/wiki/File%3A1993_Daejeon_Expo_Mascot.jpg' }
 ]
