@@ -1,11 +1,12 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, computed, onMounted, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { wonShort, ddayLabel } from '@/composables/useFormat.js'
 import BidderModal from '@/components/console/BidderModal.vue'
 import { usePostingStore } from '@/store/posting.js'
 import { useUiStore } from '@/store/ui.js'
 
+const route = useRoute()
 const router = useRouter()
 const posting = usePostingStore()
 const ui = useUiStore()
@@ -44,6 +45,11 @@ const queue = computed(() => {
 const openId = ref(null)
 const opened = computed(() => rows.value.find((p) => String(p.id) === String(openId.value)) ?? null)
 const openPanel = (id) => { openId.value = String(openId.value) === String(id) ? null : id }
+
+/* 미리보기 바에서 ?open=<공고id> 로 모달을 바로 띄웁니다 */
+watch(() => [route.query.open, rows.value.length], ([q]) => {
+  if (q && rows.value.some((p) => String(p.id) === String(q))) openId.value = String(q)
+}, { immediate: true })
 
 function onAward(b) {
   ui.notify('선정 업체를 정했습니다', `${opened.value?.name} · ${b.name}`)

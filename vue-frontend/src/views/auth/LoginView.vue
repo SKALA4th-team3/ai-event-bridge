@@ -96,11 +96,13 @@ async function doLogin() {
     <button class="btn pri" :disabled="submitting" @click="doLogin">로그인</button>
 
     <div class="asplit">처음이신가요</div>
-    <button class="btn sec" style="padding:.72em" @click="router.push('/signup')">업체 회원가입</button>
+    <!-- 가입은 한 곳입니다. 참여 업체인지 발주 기관인지는 첫 단계에서 고릅니다. -->
+    <button class="btn sec" style="padding:.72em" @click="router.push('/signup')">회원가입</button>
 
     <div class="anote" style="margin-top:1em">
-      <b>기관 담당자이신가요?</b><br>기관 도메인 이메일(<span style="font-family:var(--f-mono)">@*.go.kr</span>)로
-      가입하시면 도메인 인증 후 <b>영업일 1일</b> 내 승인됩니다.
+      참여 업체와 발주 기관 모두 이곳에서 가입합니다.<br>
+      기관은 기관 도메인 이메일(<span style="font-family:var(--f-mono)">@*.go.kr</span>)로
+      가입하면 도메인 인증 후 <b>영업일 1일</b> 내 승인됩니다.
     </div>
 
     <div class="demo">

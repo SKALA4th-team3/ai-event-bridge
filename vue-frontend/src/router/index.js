@@ -6,8 +6,11 @@ const routes = [
   /* '/' 를 먼저 잡습니다.
      아래 두 레이아웃이 모두 '/' 로 선언돼 있어, 먼저 오는 인증 레이아웃이
      '/' 를 가져가는데 빈 경로 자식이 없어 폼 자리가 비어 있었습니다.
-     (왼쪽 브랜드 패널만 뜨고 오른쪽이 하얗던 증상) */
-  { path: '/', redirect: '/home' },
+     (왼쪽 브랜드 패널만 뜨고 오른쪽이 하얗던 증상)
+
+     기관의 일터는 콘솔이라 착지도 콘솔입니다. 로그인 직후뿐 아니라
+     주소로 바로 들어와도 같아야 해서 여기서 갈라 줍니다. */
+  { path: '/', redirect: () => (useProfileStore().data?.kind === 'gov' ? '/console' : '/home') },
 
   {
     path: '/',
@@ -41,8 +44,10 @@ const routes = [
     meta: { requiresSession: true, govOnly: true },
     children: [
       { path: '',                     name: 'Dashboard',     component: () => import('@/views/console/DashboardView.vue') },
-      { path: 'postings/new',         name: 'PostingCreate', component: () => import('@/views/console/PostingCreateView.vue') },
-      { path: 'postings/:id/bidders', name: 'Bidders',       component: () => import('@/views/console/BiddersView.vue') }
+      { path: 'postings/new', name: 'PostingCreate',  component: () => import('@/views/console/PostingCreateView.vue') },
+      /* 기관의 내 정보는 콘솔 안에 둡니다 — 기관은 공개 화면을 일터로 쓰지 않습니다.
+         화면은 업체와 같은 ProfileView 이고, 그 안에서 기관/업체를 가려 그립니다. */
+      { path: 'me',           name: 'ConsoleProfile', component: () => import('@/views/public/ProfileView.vue') }
     ]
   },
 
