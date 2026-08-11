@@ -3,6 +3,7 @@
    "대기"가 실제로 존재하고, 그 공백을 숨기지 않고 단계로 드러냅니다. */
 import { ref, computed, watch } from 'vue'
 import { won } from '@/composables/useFormat.js'
+import { onEscape } from '@/composables/useEscape.js'
 
 const props = defineProps({
   state: { type: Number, default: 0 },   // 0 닫힘 · 1 금액 입력 · 2 접수 중 · 3 완료 · -1 실패
@@ -60,10 +61,13 @@ function submit() {
   err.value = ''
   emit('submit', { amount: n, proposal: file.value })
 }
+
+/* Esc 로 닫습니다 */
+onEscape(() => { if (props.state !== 0) emit('close') })
 </script>
 
 <template>
-  <div v-if="state !== 0" class="ovl">
+  <div v-if="state !== 0" class="ovl" role="dialog" aria-modal="true">
     <div class="ovlcard">
       <template v-if="state === 1">
         <h3>지원 금액을 입력해 주세요</h3>

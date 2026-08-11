@@ -19,6 +19,11 @@ const open = computed(() => rows.value.filter((p) => p.dday !== null).length)
 const bids = computed(() => rows.value.reduce((s, p) => s + p.bidderCount, 0))
 const wait = computed(() => rows.value.filter((p) => p.dday === null).length)
 const spent = computed(() => (rows.value.reduce((s, p) => s + p.budget, 0) / 1e8).toFixed(1))
+const avgBudget = computed(() => {
+  if (!rows.value.length) return 0
+  const avg = rows.value.reduce((s, p) => s + p.budget, 0) / rows.value.length
+  return Math.round(avg / 1e4).toLocaleString()
+})
 
 /* 숫자만 늘어놓으면 다음 행동이 안 보입니다. 처리할 일을 먼저 세웁니다. */
 const queue = computed(() => {
@@ -58,15 +63,16 @@ const goBid = (id) => openPanel(id)
   <div class="cview">
     <div class="kpis">
       <div class="kpi"><div class="l">모집 중 공고</div><div class="v">{{ open }}</div><div class="d">전체 {{ rows.length }}건 중</div></div>
-      <div class="kpi alert"><div class="l">총 지원</div><div class="v">{{ bids }}</div><div class="d">최근 7일</div></div>
+      <div class="kpi alert"><div class="l">총 지원</div><div class="v">{{ bids }}</div><div class="d">공고 {{ rows.length }}건 합계</div></div>
       <div class="kpi"><div class="l">선정 대기</div><div class="v">{{ wait }}</div><div class="d">마감 지난 공고</div></div>
-      <div class="kpi"><div class="l">이번 분기 집행</div><div class="v">{{ spent }}<span>억</span></div><div class="d">예산 대비 62%</div></div>
+      <div class="kpi"><div class="l">공고 예산 합계</div><div class="v">{{ spent }}<span>억</span></div><div class="d">평균 {{ avgBudget }}만원</div></div>
     </div>
 
     <div class="grid2">
       <div>
         <div class="sect-h">
-          <h3>내 공고</h3><span class="note">마감 임박순</span>
+          <h3>{{ posting.consoleIsAll ? '전체 공고' : '내 공고' }}</h3>
+          <span class="note">{{ posting.consoleIsAll ? '실습 계정이라 기관 구분 없이 전체를 봅니다 · 마감 임박순' : '마감 임박순' }}</span>
           <span class="act"><button class="btn sec" @click="router.push('/console/postings/new')">+ 공고 등록</button></span>
         </div>
         <div class="ptable">

@@ -5,7 +5,7 @@ import ApplyModal from '@/components/common/ApplyModal.vue'
 import { postingApi } from '@/api/posting.js'
 import { matchRequirements } from '@/composables/useFitScore.js'
 import { noticeStatus } from '@/constants/status.js'
-import { won, ddayLabel, isUrgent, dateShort } from '@/composables/useFormat.js'
+import { won, ddayLabel, isUrgent, dateLong } from '@/composables/useFormat.js'
 import { usePostingStore } from '@/store/posting.js'
 import { useApplicationStore } from '@/store/application.js'
 import { useProfileStore } from '@/store/profile.js'
@@ -31,7 +31,17 @@ onMounted(async () => {
 const reqs = computed(() => (w.value ? matchRequirements(w.value, profile.firm) : []))
 const metCount = computed(() => reqs.value.filter((r) => r.ok).length)
 const applied = computed(() => w.value && application.hasApplied(w.value.id))
-const code = computed(() => (w.value ? `2026-${String(w.value.orgId ?? 0).padStart(2, '0')}-W${w.value.id}` : ''))
+/* 같은 축제의 다른 공사 — 적합도가 높은 순으로 보여 줍니다 */
+const siblings = computed(() => {
+  if (!w.value) return []
+  return store.scored
+    .filter((p) => p.eventName === w.value.eventName && p.id !== w.value.id)
+    .sort((a, b) => (b.fit ?? 0) - (a.fit ?? 0))
+})
+
+const code = computed(() => (w.value
+  ? `${(w.value.deadline || '').slice(0, 4) || new Date().getFullYear()}-${String(w.value.orgId ?? 0).padStart(2, '0')}-W${w.value.id}`
+  : ''))
 
 /* 지원 흐름 — 0 닫힘 · 1 금액 입력 · 2 접수 중 · 3 완료 · -1 실패 */
 const modal = ref(0)
@@ -82,9 +92,10 @@ async function submitBid({ amount, proposal }) {
             <dt>발주 기관</dt><dd>{{ w.orgName }}</dd>
             <dt>사업 기간</dt><dd>{{ w.period || '미정' }}</dd>
             <dt>사업 예산</dt><dd>{{ won(w.budget) }} (부가세 포함)</dd>
-            <dt>지원 마감</dt><dd>{{ w.dday === null ? '마감되었습니다' : `D-${w.dday} · ${dateShort(w.deadline)} 18:00까지` }}</dd>
+            <dt>지원 마감</dt><dd>{{ w.dday === null ? '마감되었습니다' : `D-${w.dday} · ${dateLong(w.deadline)} 18:00까지` }}</dd>
             <dt>계약 방식</dt><dd>제한경쟁지원 · 적격심사</dd>
             <dt>공사 분야</dt><dd>{{ w.category }}</dd>
+            <dt>지원 현황</dt><dd>{{ w.bidderCount }}개사 지원</dd>
           </dl>
         </div>
         <div class="panel">
@@ -92,6 +103,23 @@ async function submitBid({ amount, proposal }) {
           <p style="margin:0;font-size:.83em;color:var(--tx2);line-height:1.75">
             {{ w.task || '세부 규격과 일정은 현장 설명회에서 안내합니다.' }}
           </p>
+        </div>
+
+        <!-- 한 축제는 여러 공사로 나뉘어 발주됩니다.
+             옆 공사가 우리 업종일 수도 있는데, 지금까지는 목록으로 되돌아가야 알 수 있었습니다. -->
+        <div v-if="siblings.length" class="panel">
+          <h3>같은 이벤트의 다른 공사 <span class="cnt">{{ siblings.length }}</span></h3>
+          <ul class="sibs">
+            <li v-for="sb in siblings" :key="sb.id">
+              <button class="sib" @click="router.push(`/postings/${sb.id}`)">
+                <span class="sb-n">{{ sb.name }}</span>
+                <span class="sb-c">{{ sb.category }}</span>
+                <span class="sb-b">{{ won(sb.budget) }}</span>
+                <span class="sb-d" :class="{ urgent: isUrgent(sb.dday) }">{{ ddayLabel(sb.dday) }}</span>
+                <span v-if="sb.fit != null" class="sb-f">적합 {{ sb.fit }}%</span>
+              </button>
+            </li>
+          </ul>
         </div>
       </div>
 

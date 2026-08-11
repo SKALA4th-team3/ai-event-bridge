@@ -7,6 +7,7 @@ import { useApplicationStore } from '@/store/application.js'
 import { usePostingStore } from '@/store/posting.js'
 import { useProfileStore } from '@/store/profile.js'
 import { useUiStore } from '@/store/ui.js'
+import { onEscape } from '@/composables/useEscape.js'
 
 const router = useRouter()
 const application = useApplicationStore()
@@ -72,6 +73,9 @@ function doCancel() {
   ui.toast('지원을 취소했습니다.')
   canceling.value = null
 }
+
+/* Esc 로 닫습니다 */
+onEscape(() => { editing.value = null; canceling.value = null })
 </script>
 
 <template>
@@ -134,7 +138,7 @@ function doCancel() {
     </div>
 
     <!-- 서류 재업로드 -->
-    <div v-if="editing" class="ovl" @click.self="editing = null">
+    <div v-if="editing" class="ovl" role="dialog" aria-modal="true" @click.self="editing = null">
       <div class="ovlcard">
         <h3>제출 서류 교체</h3>
         <p class="p">{{ editing.posting?.eventName }} · {{ editing.posting?.name }}</p>
@@ -177,7 +181,7 @@ function doCancel() {
     </div>
 
     <!-- 지원 취소 확인 -->
-    <div v-if="canceling" class="ovl" @click.self="canceling = null">
+    <div v-if="canceling" class="ovl" role="dialog" aria-modal="true" @click.self="canceling = null">
       <div class="ovlcard">
         <h3>지원을 취소하시겠어요?</h3>
         <p class="p">{{ canceling.posting?.eventName }} · {{ canceling.posting?.name }}</p>

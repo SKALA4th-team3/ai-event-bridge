@@ -37,7 +37,7 @@ function signOut() {
 }
 function pickSeason(s) {
   season.set(s.key)
-  ui.toast(`${s.label} 시즌 발주 현황입니다.`)
+  ui.toast(`${s.label} 시즌 발주 현황입니다.`, 'info', 'season')
 }
 </script>
 
