@@ -2,7 +2,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { wonShort, dateShort, isUrgent } from '@/composables/useFormat.js'
-import { bidStatus } from '@/constants/status.js'
+import { bidStatus, isNotSelectedBid, isReviewingBid, isSelectedBid } from '@/constants/status.js'
 import { useApplicationStore } from '@/store/application.js'
 import { usePostingStore } from '@/store/posting.js'
 import { useProfileStore } from '@/store/profile.js'
@@ -20,16 +20,22 @@ onMounted(async () => { await posting.load(); await application.load() })
 /* 상태별로 나눠 봅니다 — 무엇이 아직 결과를 기다리는지가 가장 궁금합니다 */
 const TABS = [
   { key: 'ALL',       label: '전체' },
-  { key: 'PENDING',   label: '심사 중' },
-  { key: 'ACTIVE',    label: '선정' },
-  { key: 'CANCELLED', label: '미선정' }
+  { key: 'REVIEWING', label: '심사 중' },
+  { key: 'AWARDED',   label: '선정' },
+  { key: 'NOT_AWARDED', label: '미선정' }
 ]
 const tab = ref('ALL')
 const all = computed(() => application.rows)
-const rows = computed(() => all.value.filter((a) => tab.value === 'ALL' || a.status === tab.value))
-const countOf = (k) => (k === 'ALL' ? all.value.length : all.value.filter((a) => a.status === k).length)
+const matchesTab = (a, key) => {
+  if (key === 'ALL') return true
+  if (key === 'REVIEWING') return isReviewingBid(a.status)
+  if (key === 'AWARDED') return isSelectedBid(a.status)
+  return isNotSelectedBid(a.status)
+}
+const rows = computed(() => all.value.filter((a) => matchesTab(a, tab.value)))
+const countOf = (key) => all.value.filter((a) => matchesTab(a, key)).length
 const rate = computed(() => {
-  const judged = all.value.filter((a) => a.status !== 'PENDING').length
+  const judged = application.selected + application.notSelected
   return judged ? Math.round((application.selected / judged) * 100) : 0
 })
 const orgShort = (o) => (o ?? '').split(' ').pop()
@@ -124,7 +130,7 @@ onEscape(() => { editing.value = null; canceling.value = null })
             <span class="doc" :title="a.proposal ?? ''">{{ a.proposal ?? '—' }}</span>
             <span><span class="badge" :class="bidStatus(a.status).tone">{{ a.withdrawn ? '지원 취소' : bidStatus(a.status).label }}</span></span>
             <span class="rowact">
-              <template v-if="a.status === 'PENDING'">
+              <template v-if="isReviewingBid(a.status)">
                 <button class="btn sec" @click="openEdit(a)">수정</button>
                 <button class="btn ghost2" @click="canceling = a">취소</button>
               </template>

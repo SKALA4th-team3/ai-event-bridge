@@ -4,6 +4,7 @@ import { applicationApi } from '@/api/application.js'
 import { usePostingStore } from './posting.js'
 import { demoEnrollments, canFallback, offlinePreview } from '@/constants/demoData.js'
 import { toApplication } from '@/api/application.js'
+import { isNotSelectedBid, isReviewingBid, isSelectedBid } from '@/constants/status.js'
 
 export const useApplicationStore = defineStore('application', () => {
   const list = ref([])
@@ -14,9 +15,9 @@ export const useApplicationStore = defineStore('application', () => {
   /* 공고 정보의 정본은 /api/courses입니다.
      enrollment 응답에 붙어 오는 course는 필드 표현이 달라 보조로만 씁니다. */
   const rows = computed(() => list.value.map((a) => ({ ...a, posting: posting.byId(a.postingId) ?? a.posting })))
-  const reviewing = computed(() => list.value.filter((a) => a.status === 'PENDING').length)
-  const selected = computed(() => list.value.filter((a) => a.status === 'ACTIVE').length)
-  const notSelected = computed(() => list.value.filter((a) => a.status === 'CANCELLED').length)
+  const reviewing = computed(() => list.value.filter((a) => isReviewingBid(a.status)).length)
+  const selected = computed(() => list.value.filter((a) => isSelectedBid(a.status)).length)
+  const notSelected = computed(() => list.value.filter((a) => isNotSelectedBid(a.status)).length)
   const appliedIds = computed(() => new Set(list.value.map((a) => String(a.postingId))))
   const hasApplied = (id) => appliedIds.value.has(String(id))
 
