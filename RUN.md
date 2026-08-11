@@ -243,10 +243,19 @@ docker exec -i lecturedb mariadb -umanager -pSqlDba-1 lecture_db < demo-data.sql
     기존 공고 데이터에서 걸러 낸 결과
 ```
 
-**설정하지 않아도 검색은 됩니다.** 키가 없거나 호출이 실패·지연되면
-규칙 기반 파서로 넘어갑니다 (`composables/useQueryParser.js`).
+**팀 저장소를 받으면 바로 동작합니다.** 설정값은 `src/lib/aiSearch.js` 의
+`TEAM` 상수에 들어 있어 `.env` 없이도 켜집니다.
 
-### 켜는 방법
+> 거기 있는 값은 비밀이 아닙니다. Firebase 웹 설정과 reCAPTCHA 사이트 키는
+> 어차피 클라이언트 번들에 실려 브라우저에 노출되는 공개 식별자입니다.
+> 호출을 막는 것은 App Check 이고, reCAPTCHA 키의 허용 도메인은 `localhost` 로
+> 묶여 있습니다. **reCAPTCHA 비밀 키는 저장소에 없습니다** — Firebase 콘솔에만 있습니다.
+> App Check 디버그 토큰은 개발 모드에서만 존재하며 빌드 산출물에는 들어가지 않습니다.
+
+호출이 실패하거나 늦으면(9초) 규칙 기반 파서로 넘어가므로 검색이 멈추지 않습니다
+(`composables/useQueryParser.js`).
+
+### 다른 Firebase 프로젝트를 쓰려면
 
 1. Firebase Console에서 프로젝트 생성
 2. **AI Logic → Get started → provider를 `Gemini Developer API`로 선택**
