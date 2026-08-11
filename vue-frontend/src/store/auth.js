@@ -1,8 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { authApi } from '@/api/auth.js'
-
-const AUTH_SERVER_URL = import.meta.env.VITE_AUTH_SERVER_URL || 'http://localhost:8080'
+import { GATEWAY_URL, CLIENT_ID, REDIRECT_URI } from '@/config.js'
 
 export const useAuthStore = defineStore('auth', () => {
   const accessToken = ref(sessionStorage.getItem('access_token') || null)
@@ -54,12 +53,14 @@ export const useAuthStore = defineStore('auth', () => {
   function redirectToLogin() {
     const params = new URLSearchParams({
       response_type: 'code',
-      client_id: import.meta.env.VITE_CLIENT_ID,
-      redirect_uri: import.meta.env.VITE_REDIRECT_URI,
+      client_id: CLIENT_ID,
+      redirect_uri: REDIRECT_URI,
       scope: 'openid profile read write'
     })
 
-    window.location.href = `${AUTH_SERVER_URL}/oauth2/authorize?${params.toString()}`
+    /* 브라우저가 SPA를 떠나므로 절대 주소여야 합니다.
+       게이트웨이(8080)가 /oauth2/**, /login 을 auth-server로 넘겨 줍니다. */
+    window.location.href = `${GATEWAY_URL}/oauth2/authorize?${params.toString()}`
   }
 
   async function handleCallback(code) {
