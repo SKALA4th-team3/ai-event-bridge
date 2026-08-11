@@ -47,7 +47,8 @@ const routes = [
       { path: 'postings/new', name: 'PostingCreate',  component: () => import('@/views/console/PostingCreateView.vue') },
       /* 기관의 내 정보는 콘솔 안에 둡니다 — 기관은 공개 화면을 일터로 쓰지 않습니다.
          화면은 업체와 같은 ProfileView 이고, 그 안에서 기관/업체를 가려 그립니다. */
-      { path: 'me',           name: 'ConsoleProfile', component: () => import('@/views/public/ProfileView.vue') }
+      { path: 'me',           name: 'ConsoleProfile', component: () => import('@/views/public/ProfileView.vue') },
+      { path: 'knowledge',    name: 'ConsoleKnowledge', component: () => import('@/views/console/KnowledgeAdminView.vue') }
     ]
   },
 
