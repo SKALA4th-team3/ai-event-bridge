@@ -43,8 +43,7 @@ const orgShort = (o) => (o ?? '').split(' ').pop()
 async function refresh() { await application.load(); ui.toast('최신 상태로 새로고침했습니다.') }
 
 /* ── 신청 수정 — 제출 서류만 다시 올립니다 ────────────────────
-   금액·내용 수정은 공고 조건이 바뀌는 셈이라 열지 않습니다.
-   ★ 서류 교체 API가 없어 지금은 파일명만 갱신합니다. */
+   금액·내용 수정은 공고 조건이 바뀌는 셈이라 열지 않습니다. */
 const OK_EXT = ['pdf', 'hwp', 'hwpx', 'doc', 'docx', 'zip']
 const MAX_MB = 20
 const editing = ref(null)
@@ -61,11 +60,18 @@ function pick(f) {
   if (f.size > MAX_MB * 1048576) return (fileErr.value = `${MAX_MB}MB 이하만 올릴 수 있습니다.`)
   fileErr.value = ''; newFile.value = f
 }
-function saveEdit() {
+async function saveEdit() {
   if (!newFile.value) return (fileErr.value = '새 서류를 첨부해 주세요.')
-  editing.value.proposal = newFile.value.name
-  ui.toast('제출 서류를 교체했습니다.', 'good')
-  editing.value = null
+  try {
+    await application.update(editing.value.id, {
+      bidAmount: editing.value.bidAmount,
+      proposal: newFile.value.name
+    })
+    ui.toast('제출 서류를 교체했습니다.', 'good')
+    editing.value = null
+  } catch {
+    fileErr.value = '서류 교체에 실패했습니다. 다시 시도해 주세요.'
+  }
 }
 
 /* ── 신청 취소 ─────────────────────────────────────────────

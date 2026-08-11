@@ -33,6 +33,12 @@ export const applicationApi = {
   async unaward(enrollmentId) {
     return toApplication(unwrap(await api.post(`/api/enrollments/${enrollmentId}/unaward`)))
   },
+  async update(enrollmentId, { bidAmount, proposal }) {
+    return toApplication(unwrap(await api.patch(`/api/enrollments/${enrollmentId}`, {
+      bidAmount,
+      proposal
+    })))
+  },
   /** 지원 생성은 Enrollment Service 경로로 요청한다. */
   async apply(courseId, { bidAmount, proposal } = {}) {
     return toApplication(unwrap(await api.post(`/api/enrollments/courses/${courseId}`, {
