@@ -2,7 +2,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { wonShort, ddayLabel } from '@/composables/useFormat.js'
-import { DEMO_BIDDERS } from '@/constants/demoBidders.js'
+import BidderModal from '@/components/console/BidderModal.vue'
 import { usePostingStore } from '@/store/posting.js'
 import { useUiStore } from '@/store/ui.js'
 
@@ -37,22 +37,15 @@ const queue = computed(() => {
   q.push({ id: 'meet', dot: 's', t: '현장 설명회 준비', s: '09.24 14:00 · 시청 3층', b: '일정', toast: '일정을 캘린더에 추가했습니다.' })
   return q
 })
-/* 처리 대기를 누르면 화면을 옮기지 않고 아래에 지원 업체를 펼칩니다.
-   담당자가 목록과 후보를 같은 화면에서 견주게 하려는 것입니다. */
+/* 공고를 누르면 지원 업체를 모달로 엽니다.
+   전에는 표 아래에 펼쳤는데, 위쪽 공고를 누르면 결과가 화면 밖이라
+   스크롤로 찾아야 했습니다. 선정은 집중이 필요한 결정이라
+   다른 것이 안 보이는 자리에서 견주게 합니다. */
 const openId = ref(null)
 const opened = computed(() => rows.value.find((p) => String(p.id) === String(openId.value)) ?? null)
+const openPanel = (id) => { openId.value = String(openId.value) === String(id) ? null : id }
 
-/* ★ 공고별 지원 업체 조회 API가 없어 시연 명단을 씁니다.
-     findByCourseId 가 추가되면 이 한 줄만 API 호출로 바꾸면 됩니다. */
-const bidders = ref([])
-function openPanel(id) {
-  openId.value = String(openId.value) === String(id) ? null : id
-  if (openId.value) bidders.value = DEMO_BIDDERS.map((b) => ({ ...b }))
-}
-const picked = computed(() => bidders.value.some((b) => b.status === '선정'))
-function award(b) {
-  bidders.value.forEach((x) => { if (x.status === '선정') x.status = '검토' })
-  b.status = '선정'
+function onAward(b) {
   ui.notify('선정 업체를 정했습니다', `${opened.value?.name} · ${b.name}`)
   ui.toast(`${b.name}을(를) 선정했습니다.`, 'good')
 }
@@ -102,42 +95,6 @@ const goBid = (id) => openPanel(id)
     </div>
 
     <!-- 선택한 공고의 지원 업체 -->
-    <section v-if="opened" class="bidpanel">
-      <div class="sect-h">
-        <h3>{{ opened.name }} · 지원 업체</h3>
-        <span class="note">{{ bidders.length }}개사 · 예산 {{ wonShort(opened.budget) }} · {{ ddayLabel(opened.dday) }}</span>
-        <span class="act">
-          <button class="btn sec" @click="openId = null">접기</button>
-          <button class="btn sec" @click="router.push(`/console/postings/${opened.id}/bidders`)">AI 추천 보기 →</button>
-        </span>
-      </div>
-      <div class="bidcards">
-        <article v-for="b in bidders" :key="b.id" class="bidcard" :class="{ won: b.status === '선정' }">
-          <span class="bc-top">
-            <span class="ava">{{ b.name.replace(/[()주]/g, '').charAt(0) }}</span>
-            <span class="bc-n">
-              <b>{{ b.name }}</b>
-              <em>{{ b.loc }} · {{ b.category }}</em>
-            </span>
-            <span class="badge" :class="b.status === '선정' ? 'ok' : b.status === '미달' ? '' : 'sec'">
-              {{ b.status === '검토' ? '심사 중' : b.status === '미달' ? '요건 미달' : b.status }}
-            </span>
-          </span>
-          <span class="bc-m">
-            <span class="ec-stat"><b>{{ b.records }}</b>건 수행</span>
-            <span class="ec-stat fit">적합 <b>{{ b.fit }}%</b></span>
-          </span>
-          <span class="bar"><i :style="{ width: b.fit + '%' }" /></span>
-          <p class="bc-why">{{ b.why }}</p>
-          <span class="bc-act">
-            <button v-if="b.status === '선정'" class="btn sec" @click="b.status = '검토'">선정 취소</button>
-            <button v-else class="btn pri" :disabled="picked || b.status === '미달'" @click="award(b)">이 업체 선정</button>
-          </span>
-        </article>
-      </div>
-      <p v-if="picked" class="note" style="margin:.7em 0 0;font-size:calc(var(--u)*.76);color:var(--tx3)">
-        이미 선정된 업체가 있습니다. 다른 업체를 고르려면 선정을 먼저 취소해 주세요.
-      </p>
-    </section>
+    <BidderModal :posting="opened" @close="openId = null" @award="onAward" />
   </div>
 </template>
