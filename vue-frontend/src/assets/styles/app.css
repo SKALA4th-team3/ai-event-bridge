@@ -412,8 +412,9 @@
   .prow{display:grid;grid-template-columns:minmax(0,1fr) 5.4em 3.6em 4.2em 6em;gap:.8em;align-items:center;
     padding:.65em .9em;border-bottom:1px solid var(--line);font-size:calc(var(--u)*.84);min-height:3em}
   .prow:last-child{border-bottom:none}
-  .prow.hd{background:var(--band2);font-family:var(--f-mono);font-size:calc(var(--u)*.68);letter-spacing:.08em;
+  .prow.hd{background:var(--band2);font-family:var(--f-mono);letter-spacing:.08em;
     text-transform:uppercase;color:var(--tx2);min-height:0;padding:.5em .9em}
+  .prow.hd > *{font-size:calc(var(--u)*.68)}
   .prow.click{cursor:pointer}
   .prow.click:hover{background:var(--brand-bg)}
   .prow .pn{font-weight:640;line-height:1.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -971,25 +972,10 @@
 
 /* ══ 콘솔 · 처리 대기에서 펼치는 지원 업체 ═══════════════════
    화면을 옮기지 않고 같은 자리에서 후보를 견주고 선정합니다. */
-.bidpanel{margin-top:1.3em;padding-top:1.1em;border-top:1px solid var(--line);
-  animation:fadeup .3s var(--ease) both}
-.bidcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(17em,1fr));gap:.85em}
-.bidcard{display:grid;gap:.5em;padding:.9em;background:var(--bg2);border:1px solid var(--line);
-  border-radius:.72em;transition:border-color var(--quick) var(--ease),box-shadow var(--quick) var(--ease)}
-.bidcard:hover{border-color:var(--brand-bd);box-shadow:var(--shadow)}
-.bidcard.won{border-color:var(--ok-bd);background:var(--ok-bg)}
-.bc-top{display:flex;align-items:center;gap:.55em}
-.bc-top .ava{width:2.1em;height:2.1em;border-radius:50%;display:grid;place-items:center;flex:none;
+/* 업체 머리글자 원 — 지원 업체 모달이 씁니다 */
+.ava{width:2.1em;height:2.1em;border-radius:50%;display:grid;place-items:center;flex:none;
   background:var(--band);color:var(--tx2);font-size:calc(var(--u)*.82);font-weight:800}
-.bc-n{flex:1;min-width:0;display:grid;gap:.05em}
-.bc-n b{font-size:calc(var(--u)*.86);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.bc-n em{font-style:normal;font-size:calc(var(--u)*.7);color:var(--tx3)}
-.bc-m{display:flex;align-items:center;gap:.85em;font-size:calc(var(--u)*.76);color:var(--tx2)}
-.bc-m .fit{margin-left:auto;color:var(--sec)}
-.bc-why{margin:0;font-size:calc(var(--u)*.74);color:var(--tx2);line-height:1.55;
-  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.bc-act{display:flex}
-.bc-act .btn{width:100%;justify-content:center}
+
 .prow.click.on{background:var(--brand-bg);box-shadow:inset .22em 0 0 var(--brand)}
 
 /* 내 지원 관리 — 상태 탭과 행 동작 */
@@ -1077,3 +1063,111 @@
 .adate{display:flex;flex-direction:column;gap:.12em;color:var(--tx2)}
 .adate small{font-size:calc(var(--u)*.68);color:var(--tx3)}
 .adate small.hot{color:var(--brand);font-weight:700}
+
+/* ── 지원 업체 선정 모달 ────────────────────────────────────
+   표 아래 인라인 패널을 대신합니다. 선정은 되돌리기 번거로운
+   결정이라, 다른 것이 안 보이는 자리에서 견주게 합니다. */
+.bidovl{padding:1.6em}
+.bidsheet{width:min(64em,100%);max-height:100%;display:flex;flex-direction:column;
+  background:var(--bg2);border:1px solid var(--line);border-radius:1em;
+  box-shadow:0 30px 70px -30px rgba(0,0,0,.6);overflow:hidden;
+  animation:sheetin var(--move) var(--spring) both}
+@keyframes sheetin{from{opacity:0;transform:translateY(1.2em) scale(.985)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){ .bidsheet{animation:none} }
+
+.bs-h{flex:none;display:flex;align-items:flex-start;gap:1em;padding:1.1em 1.3em .9em;
+  border-bottom:1px solid var(--line);background:var(--band2)}
+.bs-t{min-width:0;flex:1}
+.bs-t h3{margin:0 0 .22em;font-size:calc(var(--u)*1.12);font-weight:740;letter-spacing:-.02em}
+.bs-t p{margin:0;font-size:calc(var(--u)*.79);color:var(--tx2);display:flex;flex-wrap:wrap;gap:.34em;align-items:center}
+.bs-t .sep{color:var(--line-hi)}
+.bs-t b{font-variant-numeric:tabular-nums}
+.bs-t b.hot{color:var(--brand)}
+.bs-tools{flex:none;display:flex;align-items:center;gap:.6em}
+.bs-x{width:26px;height:26px;display:grid;place-items:center;border:1px solid var(--line);
+  border-radius:.4em;background:var(--bg2);color:var(--tx2);cursor:pointer;font-size:calc(var(--u)*.82);
+  transition:color var(--quick) var(--ease),border-color var(--quick) var(--ease)}
+.bs-x:hover{color:var(--brand);border-color:var(--brand-bd)}
+
+.sortseg{display:flex;border:1px solid var(--line);border-radius:.45em;overflow:hidden;background:var(--bg2)}
+.sortseg button{border:none;background:none;font:inherit;font-size:calc(var(--u)*.72);color:var(--tx2);
+  padding:.42em .7em;min-height:26px;cursor:pointer;white-space:nowrap;
+  transition:background var(--quick) var(--ease),color var(--quick) var(--ease)}
+.sortseg button + button{border-left:1px solid var(--line)}
+.sortseg button:hover{background:var(--band2)}
+.sortseg button.on{background:var(--brand);color:#fff;font-weight:700}
+
+.bs-b{flex:1;min-height:0;overflow-y:auto;padding:1.1em 1.3em;display:flex;flex-direction:column;gap:1.25em}
+.bs-sec{display:flex;flex-direction:column;gap:.6em}
+.bs-lb{margin:0;display:flex;align-items:baseline;gap:.42em;font-size:calc(var(--u)*.84);font-weight:700}
+.bs-lb .mk{color:var(--brand)}
+.bs-lb .cnt{color:var(--brand);font-weight:800}
+.bs-lb em{font-style:normal;font-weight:400;font-size:calc(var(--u)*.72);color:var(--tx3)}
+
+/* ① AI 1순위 — 판단 근거까지 한 카드에 */
+.topcard{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:.9em 1.4em;
+  padding:1em 1.15em;border:1.5px solid var(--brand-bd);border-radius:.75em;background:var(--brand-bg)}
+.topcard.won{border-color:var(--ok-bd);background:var(--ok-bg)}
+.tc-l{display:flex;align-items:center;gap:.7em;min-width:0}
+.ava.lg{width:2.5em;height:2.5em;font-size:calc(var(--u)*.95)}
+.tc-id{min-width:0;display:flex;flex-direction:column;gap:.16em}
+.tc-id b{font-size:calc(var(--u)*.98);font-weight:740;letter-spacing:-.01em}
+.tc-id em{font-style:normal;font-size:calc(var(--u)*.76);color:var(--tx2)}
+.tc-tags{display:flex;gap:.34em;margin-top:.16em}
+.tg{font-size:calc(var(--u)*.68);color:var(--tx2);background:var(--bg2);
+  border:1px solid var(--line);border-radius:99px;padding:.16em .55em}
+.tc-m{display:flex;flex-direction:column;gap:.4em;justify-content:center}
+.tc-fit{display:flex;align-items:baseline;gap:.4em}
+.tc-fit .n{font-size:calc(var(--u)*1.75);font-weight:800;color:var(--sec);
+  letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+.tc-fit .n i{font-style:normal;font-size:.5em;font-weight:700}
+.tc-fit .l{font-size:calc(var(--u)*.74);color:var(--tx2)}
+.bar.lg{height:calc(var(--u)*.4)}
+/* .bar 는 flex:1 이라 가로 컨테이너를 전제합니다.
+   세로 flex 안에서는 flex-basis:0 이 '높이 0'이 되어 막대가 사라집니다. */
+.tc-m > .bar,.bcard > .bar{flex:none}
+.tc-why{margin:.1em 0 0;font-size:calc(var(--u)*.76);color:var(--tx2);font-weight:600}
+.tc-why2{grid-column:1/-1;margin:0;padding:.7em 0 0;list-style:none;border-top:1px dashed var(--line);
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(15em,1fr));gap:.3em .9em}
+.tc-why2 li{font-size:calc(var(--u)*.75);color:var(--tx2);line-height:1.55;display:flex;gap:.4em}
+.tc-why2 .m{color:var(--brand);flex:none}
+.tc-act{grid-column:1/-1}
+.tc-act .btn{width:100%;padding:.62em;font-size:calc(var(--u)*.88)}
+
+/* ② 다른 후보 — 같은 지표가 같은 자리에 오게 */
+.bidgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(15.5em,1fr));gap:.7em}
+.bcard{display:flex;flex-direction:column;gap:.55em;padding:.85em .95em;
+  border:1px solid var(--line);border-radius:.65em;background:var(--bg2);
+  transition:border-color var(--quick) var(--ease),transform var(--quick) var(--ease)}
+.bcard:hover{border-color:var(--brand-bd);transform:translateY(-2px)}
+.bc-h{display:flex;align-items:center;gap:.55em;min-width:0}
+.bc-id{min-width:0;display:flex;flex-direction:column;gap:.1em}
+.bc-id b{font-size:calc(var(--u)*.85);font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bc-id em{font-style:normal;font-size:calc(var(--u)*.71);color:var(--tx3)}
+.bc-kv{margin:0;display:grid;grid-template-columns:repeat(3,1fr);gap:.3em}
+.bc-kv div{display:flex;flex-direction:column;gap:.1em}
+.bc-kv dt{font-size:calc(var(--u)*.66);color:var(--tx3)}
+.bc-kv dd{margin:0;font-size:calc(var(--u)*.82);font-weight:700;font-variant-numeric:tabular-nums}
+.bc-kv dd.strong{color:var(--sec)}
+.bc-go{width:100%;padding:.42em;font-size:calc(var(--u)*.78);min-height:26px}
+.bcard.out{opacity:.72;background:var(--band2)}
+.bcard.out:hover{transform:none;border-color:var(--line)}
+.bc-out{margin:0;font-size:calc(var(--u)*.75);font-weight:600;color:var(--tx2)}
+.bc-rs{margin:0;padding:0 0 0 .9em;list-style:disc}
+.bc-rs li{font-size:calc(var(--u)*.71);color:var(--tx3);line-height:1.55}
+
+.foldbtn{display:flex;align-items:center;gap:.42em;padding:.42em 0;min-height:26px;
+  border:none;background:none;font:inherit;font-size:calc(var(--u)*.8);font-weight:700;
+  color:var(--tx2);cursor:pointer}
+.foldbtn:hover{color:var(--brand)}
+.foldbtn .cr{display:inline-block;transition:transform var(--quick) var(--ease)}
+.foldbtn .cr.on{transform:rotate(90deg)}
+.foldbtn em{font-style:normal;font-weight:400;font-size:calc(var(--u)*.72);color:var(--tx3)}
+
+.bs-f{flex:none;display:flex;align-items:center;justify-content:space-between;gap:1em;
+  padding:.8em 1.3em;border-top:1px solid var(--line);background:var(--band2)}
+.bs-note{font-size:calc(var(--u)*.75);color:var(--tx2)}
+
+@media (max-width:900px){
+  .topcard{grid-template-columns:1fr}
+}
