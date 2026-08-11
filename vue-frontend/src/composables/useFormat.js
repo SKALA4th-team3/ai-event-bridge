@@ -12,3 +12,5 @@ export function wonShort(n) {
 export const ddayLabel = (d) => (d === null ? '마감' : `D-${d}`)
 export const isUrgent = (d) => d !== null && d <= 7
 export const dateShort = (iso) => (iso ? iso.slice(5, 10).replace('-', '.') : '')
+/* 마감이 해를 넘길 수 있어, 결정을 내리는 자리에서는 연도까지 적습니다 */
+export const dateLong = (iso) => (iso ? iso.replaceAll('-', '.') : '')

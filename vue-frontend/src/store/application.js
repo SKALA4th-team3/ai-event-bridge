@@ -16,6 +16,7 @@ export const useApplicationStore = defineStore('application', () => {
   const rows = computed(() => list.value.map((a) => ({ ...a, posting: posting.byId(a.postingId) ?? a.posting })))
   const reviewing = computed(() => list.value.filter((a) => a.status === 'PENDING').length)
   const selected = computed(() => list.value.filter((a) => a.status === 'ACTIVE').length)
+  const notSelected = computed(() => list.value.filter((a) => a.status === 'CANCELLED').length)
   const appliedIds = computed(() => new Set(list.value.map((a) => String(a.postingId))))
   const hasApplied = (id) => appliedIds.value.has(String(id))
 
@@ -58,5 +59,5 @@ export const useApplicationStore = defineStore('application', () => {
     }
     return null
   }
-  return { list, rows, loading, reviewing, selected, hasApplied, load, apply, pollUntilActive }
+  return { list, rows, loading, reviewing, selected, notSelected, hasApplied, load, apply, pollUntilActive }
 })

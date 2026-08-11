@@ -4,7 +4,7 @@ import { useRoute, useRouter } from 'vue-router'
 import api from '@/api/index.js'
 import { postingApi } from '@/api/posting.js'
 import { wonShort, ddayLabel } from '@/composables/useFormat.js'
-import { DEMO_BIDDERS } from '@/constants/demoBidders.js'
+import { DEMO_BIDDERS, biddersFor } from '@/constants/demoBidders.js'
 import { usePostingStore } from '@/store/posting.js'
 import { useUiStore } from '@/store/ui.js'
 
@@ -45,7 +45,8 @@ async function load() {
     }))
     demo.value = false
   } catch {
-    bids.value = DEMO_BIDDERS.map((b) => ({ ...b }))
+    /* 이 공고 기준으로 적합도와 검토 의견을 다시 잽니다 */
+    bids.value = w.value ? biddersFor(w.value) : DEMO_BIDDERS.map((b) => ({ ...b }))
     demo.value = true
   }
   cur.value = 0
