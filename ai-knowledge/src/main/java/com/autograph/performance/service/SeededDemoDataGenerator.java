@@ -3,6 +3,8 @@ package com.autograph.performance.service;
 import com.autograph.performance.api.BidResponse;
 import com.autograph.performance.api.RegressionAnalysis;
 import com.autograph.performance.api.YearPerformance;
+import com.autograph.performance.domain.KnowledgeEventPerformanceEntity;
+import com.autograph.performance.domain.KnowledgeEventPerformanceRepository;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -18,9 +20,12 @@ public class SeededDemoDataGenerator {
     private static final long BID_SALT = 0x424944534545444CL;
     private static final String[] COMPANIES = {"한빛이벤트", "드림축제기획", "지역문화컴퍼니"};
     private final LinearRegressionCalculator regressionCalculator;
+    private final KnowledgeEventPerformanceRepository performanceRepository;
 
-    public SeededDemoDataGenerator(LinearRegressionCalculator regressionCalculator) {
+    public SeededDemoDataGenerator(LinearRegressionCalculator regressionCalculator,
+                                    KnowledgeEventPerformanceRepository performanceRepository) {
         this.regressionCalculator = regressionCalculator;
+        this.performanceRepository = performanceRepository;
     }
 
     public PerformanceData performance(long eventId) {
@@ -39,6 +44,19 @@ public class SeededDemoDataGenerator {
     }
 
     private List<YearPerformance> historicalData(long eventId) {
+        List<KnowledgeEventPerformanceEntity> persisted =
+                performanceRepository.findByEventIdOrderByYearAsc(eventId);
+        if (!persisted.isEmpty()) {
+            return persisted.stream()
+                    .map(e -> new YearPerformance(e.getYear(), e.getVisitors(), e.getCost(), e.getRevenue(),
+                            e.getNetProfit(), false))
+                    .toList();
+        }
+        return seededHistoricalData(eventId);
+    }
+
+    /** DB에 실제 성과 이력이 없는 eventId를 위한 데모 폴백. 매번 같은 seed로 같은 값을 만든다. */
+    private List<YearPerformance> seededHistoricalData(long eventId) {
         SplittableRandom random = random(eventId, HISTORY_SALT);
         int baseVisitors = roundTo(random.nextInt(22_000, 36_001), 100);
         int annualVisitorGrowth = random.nextInt(650, 1_301);

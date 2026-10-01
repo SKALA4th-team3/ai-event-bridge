@@ -1,13 +1,25 @@
 package com.autograph.performance.service;
 
 import com.autograph.performance.api.YearPerformance;
+import com.autograph.performance.domain.KnowledgeEventPerformanceEntity;
+import com.autograph.performance.domain.KnowledgeEventPerformanceRepository;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.within;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class SeededDemoDataGeneratorTest {
-    private final SeededDemoDataGenerator generator = new SeededDemoDataGenerator(new LinearRegressionCalculator());
+    private final KnowledgeEventPerformanceRepository performanceRepository = mock(KnowledgeEventPerformanceRepository.class);
+    private final SeededDemoDataGenerator generator;
+
+    {
+        when(performanceRepository.findByEventIdOrderByYearAsc(anyLong())).thenReturn(List.of());
+        generator = new SeededDemoDataGenerator(new LinearRegressionCalculator(), performanceRepository);
+    }
 
     @Test
     void sameEventIdAlwaysProducesSameTwentyHistoricalYears() {
@@ -60,5 +72,19 @@ class SeededDemoDataGeneratorTest {
     @Test
     void zeroBidAmountHasZeroRoi() {
         assertThat(SeededDemoDataGenerator.roi(100_000, 0)).isZero();
+    }
+
+    @Test
+    void usesPersistedHistoryInsteadOfSeededFallbackWhenDbHasData() {
+        var persisted = List.of(
+                new KnowledgeEventPerformanceEntity(501, 2023, 40_000, 20_000_000L, 30_000_000L, 10_000_000L),
+                new KnowledgeEventPerformanceEntity(501, 2024, 42_000, 21_000_000L, 32_000_000L, 11_000_000L));
+        when(performanceRepository.findByEventIdOrderByYearAsc(501)).thenReturn(persisted);
+
+        var history = generator.history(501);
+
+        assertThat(history).hasSize(2);
+        assertThat(history.get(0)).isEqualTo(new YearPerformance(2023, 40_000, 20_000_000L, 30_000_000L, 10_000_000L, false));
+        assertThat(history.get(1)).isEqualTo(new YearPerformance(2024, 42_000, 21_000_000L, 32_000_000L, 11_000_000L, false));
     }
 }

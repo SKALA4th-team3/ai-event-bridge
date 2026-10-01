@@ -1,2 +1,18 @@
 server:
   port: 18080
+
+spring:
+  datasource:
+    url: jdbc:mariadb://localhost:3379/lecture_db
+    username: manager
+    password: SqlDba-1
+    driver-class-name: org.mariadb.jdbc.Driver
+  jpa:
+    hibernate:
+      # knowledge_bid / knowledge_event_performance 만 새로 만든다.
+      # 기존 courses/enrollments/users/payments 테이블은 건드리지 않는다.
+      ddl-auto: update
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: false

@@ -8,6 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicLong;
 
+/** DB 없이 띄울 때를 위한 참고용 구현체. 기본 주입 대상은 {@link JpaBidStore} (@Primary). */
 @Repository
 public class InMemoryBidStore implements BidStore {
     private final ConcurrentHashMap<Long, CopyOnWriteArrayList<BidResponse>> bids = new ConcurrentHashMap<>();
