@@ -11,3 +11,17 @@ spring:
     hibernate:
       ddl-auto: create-drop
     open-in-view: false
+
+# 테스트에서는 실제로 호출되지 않는 더미 주소 (WebClient 빈 생성만 통과하면 됨)
+services:
+  course-service:
+    base-url: http://localhost:0
+  enrollment-service:
+    base-url: http://localhost:0
+  user-service:
+    base-url: http://localhost:0
+
+agent:
+  ollama:
+    base-url: http://localhost:0
+    model: qwen3.5:4b

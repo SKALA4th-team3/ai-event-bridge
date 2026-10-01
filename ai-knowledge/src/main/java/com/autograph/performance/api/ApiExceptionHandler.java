@@ -24,4 +24,16 @@ public class ApiExceptionHandler {
                 .orElse("입력값을 확인해 주세요.");
         return Map.of("message", message);
     }
+
+    @ExceptionHandler(IllegalStateException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    Map<String, String> handleIllegalState(IllegalStateException exception) {
+        return Map.of("message", exception.getMessage());
+    }
+
+    @ExceptionHandler(AgentUnavailableException.class)
+    @ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE)
+    Map<String, String> handleAgentUnavailable(AgentUnavailableException exception) {
+        return Map.of("message", exception.getMessage());
+    }
 }

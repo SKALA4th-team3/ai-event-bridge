@@ -1,9 +1,11 @@
 import { fitScore, matchRequirements } from '@/composables/useFitScore.js'
 
-/* 시연용 지원 업체 명단.
-   ★ enrollment-service의 EnrollmentRepository에 findByCourseId가 없어
-     "공고별 지원 업체 조회" API가 존재하지 않습니다.
-     저장소에 메서드가 추가되면 이 파일 대신 API 응답을 쓰면 됩니다.
+/* 공개 화면(/home)의 "추천 업체" 미리보기용 시연 데이터.
+   특정 공고에 묶이지 않은 전체 업체 추천이라 여전히 목업입니다.
+   ※ "공고별 지원 업체 조회"는 이미 실제 API로 연결되어 있습니다
+     (enrollment-service GET /api/enrollments/courses/{courseId},
+      components/console/BidderModal.vue가 applicationApi.byCourse()로 사용) —
+     이 파일과는 다른 화면/용도입니다.
 
    fit 은 목록 화면에서 쓰는 대략적인 값입니다.
    공고를 특정한 화면(지원 업체 심사)에서는 reviewOf() 로 그 공고에 맞춰 다시 잽니다. */

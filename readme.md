@@ -112,6 +112,12 @@ npm run dev
 
 - [프론트엔드](http://localhost:3000/)
 
+## AI 업체 비교 모듈 (ai-knowledge)
+
+`ai-knowledge/` 디렉터리에 행사 성과·입찰 비교와 로컬 LLM(Qwen, Ollama) 기반 업체 비교 에이전트가
+별도 모듈로 들어 있습니다. 이 docker-compose 스택과는 독립적으로 실행되며, course/user/enrollment-service와
+REST로 연동됩니다. 자세한 실행 방법은 [`ai-knowledge/README.md`](ai-knowledge/README.md)를 참고하세요.
+
 ## 종료 및 재실행
 
 전체 컨테이너를 종료하고 정리합니다.

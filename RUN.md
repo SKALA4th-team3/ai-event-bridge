@@ -313,9 +313,11 @@ await m.probeModel('gemini-flash-latest')   // 이 모델 ID 가 사는지
 
 프론트엔드는 백엔드를 고치지 않고 만들었습니다. 그래서 남는 제약이 있습니다.
 
-- **지원 업체 목록만 시연 데이터입니다.** `EnrollmentRepository`에 `findByCourseId`가 없어
-  "공고별 지원 업체 조회" API가 존재하지 않습니다. 저장소에 메서드가 추가되면
-  `views/console/BiddersView.vue`의 `BIDDER_API_READY = true` 한 줄로 실데이터가 됩니다.
+- ~~지원 업체 목록만 시연 데이터입니다~~ — 더 이상 사실이 아닙니다. `EnrollmentRepository.findByCourseId`와
+  `GET /api/enrollments/courses/{courseId}`가 이미 구현되어 있고, `components/console/BidderModal.vue`가
+  `applicationApi.byCourse()`로 실제 지원 현황을 가져옵니다(실데이터 확인 완료, 2026-10-02).
+  `constants/demoBidders.js`는 별개로 공개 화면(`/home`)의 "추천 업체" 미리보기용 시연 데이터입니다 —
+  특정 공고에 묶이지 않은 전체 업체 추천이라 여전히 목업입니다.
 - **결제는 항상 성공합니다.** `PaymentService`가 무조건 `COMPLETED`를 돌려주므로
   지원은 접수 직후 곧바로 "선정"으로 바뀝니다.
 - **예산 상한은 9,999만원입니다.** `courses.price`가 `decimal(10,2)`입니다.

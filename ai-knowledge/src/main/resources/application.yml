@@ -16,3 +16,19 @@ spring:
     properties:
       hibernate:
         format_sql: false
+
+# course/enrollment/user-service 연동 (REST). 로컬 개발 기준 포트 — RUN.md 5절과 동일.
+# 꺼져 있어도 ai-knowledge는 죽지 않고 기존 데모 폴백으로 동작한다.
+services:
+  course-service:
+    base-url: http://localhost:8082
+  enrollment-service:
+    base-url: http://localhost:8083
+  user-service:
+    base-url: http://localhost:8081
+
+# 로컬 Ollama(Qwen) 기반 업체 비교 에이전트
+agent:
+  ollama:
+    base-url: http://localhost:11434
+    model: qwen3.5:4b
