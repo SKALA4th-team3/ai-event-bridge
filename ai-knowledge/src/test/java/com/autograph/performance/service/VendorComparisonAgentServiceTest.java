@@ -1,7 +1,10 @@
 package com.autograph.performance.service;
 
 import com.autograph.performance.api.AgentUnavailableException;
+import com.autograph.performance.api.VendorComparisonHistoryItem;
 import com.autograph.performance.api.VendorComparisonResponse;
+import com.autograph.performance.domain.KnowledgeVendorComparisonLogEntity;
+import com.autograph.performance.domain.KnowledgeVendorComparisonLogRepository;
 import com.autograph.performance.domain.KnowledgeVendorDocumentRepository;
 import com.autograph.performance.integration.CourseInfo;
 import com.autograph.performance.integration.CourseServiceClient;
@@ -13,13 +16,16 @@ import com.autograph.performance.integration.UserServiceClient;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 class VendorComparisonAgentServiceTest {
@@ -27,10 +33,12 @@ class VendorComparisonAgentServiceTest {
     private final EnrollmentServiceClient enrollmentServiceClient = mock(EnrollmentServiceClient.class);
     private final UserServiceClient userServiceClient = mock(UserServiceClient.class);
     private final KnowledgeVendorDocumentRepository documentRepository = mock(KnowledgeVendorDocumentRepository.class);
+    private final KnowledgeVendorComparisonLogRepository logRepository = mock(KnowledgeVendorComparisonLogRepository.class);
     private final OllamaClient ollamaClient = mock(OllamaClient.class);
 
     private final VendorComparisonAgentService service = new VendorComparisonAgentService(
-            courseServiceClient, enrollmentServiceClient, userServiceClient, documentRepository, ollamaClient);
+            courseServiceClient, enrollmentServiceClient, userServiceClient, documentRepository, logRepository,
+            ollamaClient);
 
     @Test
     void rejectsEventIdNotLinkedToRealCourse() {
@@ -86,5 +94,21 @@ class VendorComparisonAgentServiceTest {
         assertThat(result.scores()).hasSize(1);
         assertThat(result.scores().get(0).companyName()).isEqualTo("한빛무대");
         assertThat(result.scores().get(0).score()).isEqualTo(90);
+        verify(logRepository).save(any(KnowledgeVendorComparisonLogEntity.class));
+    }
+
+    @Test
+    void historyReturnsPastLogEntriesNewestFirst() {
+        KnowledgeVendorComparisonLogEntity logged = new KnowledgeVendorComparisonLogEntity(1, "한강 여름축제 주무대 설치",
+                "한빛무대", "유일한 지원 업체",
+                "[{\"companyName\":\"한빛무대\",\"score\":90,\"comment\":\"양호\"}]", "qwen3.5:4b", Instant.now());
+        when(logRepository.findByEventIdOrderByCreatedAtDesc(1)).thenReturn(List.of(logged));
+
+        List<VendorComparisonHistoryItem> history = service.history(1);
+
+        assertThat(history).hasSize(1);
+        assertThat(history.get(0).recommendedCompany()).isEqualTo("한빛무대");
+        assertThat(history.get(0).scores()).hasSize(1);
+        assertThat(history.get(0).scores().get(0).score()).isEqualTo(90);
     }
 }

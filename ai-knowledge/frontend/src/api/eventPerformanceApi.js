@@ -18,3 +18,7 @@ export const createBid = (eventId, bid) =>
  *  실제 입찰·과거 수행 평가 문서를 근거로 업체를 비교·추천한다. */
 export const compareVendors = (eventId) =>
   fetch(`/api/events/${encodeURIComponent(eventId)}/vendor-comparison`).then(readJson)
+
+/** 이 공고에 대해 과거에 호출했던 AI 업체 비교 결과들(최신순). 호출할 때마다 휘발되지 않도록 서버가 DB에 남긴 로그. */
+export const getVendorComparisonHistory = (eventId) =>
+  fetch(`/api/events/${encodeURIComponent(eventId)}/vendor-comparison/history`).then(readJson)

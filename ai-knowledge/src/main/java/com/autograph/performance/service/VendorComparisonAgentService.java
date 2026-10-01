@@ -1,8 +1,11 @@
 package com.autograph.performance.service;
 
 import com.autograph.performance.api.AgentUnavailableException;
+import com.autograph.performance.api.VendorComparisonHistoryItem;
 import com.autograph.performance.api.VendorComparisonResponse;
 import com.autograph.performance.api.VendorScoreResponse;
+import com.autograph.performance.domain.KnowledgeVendorComparisonLogEntity;
+import com.autograph.performance.domain.KnowledgeVendorComparisonLogRepository;
 import com.autograph.performance.domain.KnowledgeVendorDocumentEntity;
 import com.autograph.performance.domain.KnowledgeVendorDocumentRepository;
 import com.autograph.performance.integration.CourseInfo;
@@ -12,11 +15,14 @@ import com.autograph.performance.integration.EnrollmentServiceClient;
 import com.autograph.performance.integration.OllamaClient;
 import com.autograph.performance.integration.UserServiceClient;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -27,10 +33,13 @@ import java.util.stream.Collectors;
  */
 @Service
 public class VendorComparisonAgentService {
+    private static final Logger log = LoggerFactory.getLogger(VendorComparisonAgentService.class);
+
     private final CourseServiceClient courseServiceClient;
     private final EnrollmentServiceClient enrollmentServiceClient;
     private final UserServiceClient userServiceClient;
     private final KnowledgeVendorDocumentRepository documentRepository;
+    private final KnowledgeVendorComparisonLogRepository logRepository;
     private final OllamaClient ollamaClient;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -38,11 +47,13 @@ public class VendorComparisonAgentService {
                                          EnrollmentServiceClient enrollmentServiceClient,
                                          UserServiceClient userServiceClient,
                                          KnowledgeVendorDocumentRepository documentRepository,
+                                         KnowledgeVendorComparisonLogRepository logRepository,
                                          OllamaClient ollamaClient) {
         this.courseServiceClient = courseServiceClient;
         this.enrollmentServiceClient = enrollmentServiceClient;
         this.userServiceClient = userServiceClient;
         this.documentRepository = documentRepository;
+        this.logRepository = logRepository;
         this.ollamaClient = ollamaClient;
     }
 
@@ -73,11 +84,53 @@ public class VendorComparisonAgentService {
         }
 
         List<VendorScoreResponse> scores = parsed.scores() == null ? List.of() : parsed.scores().stream()
-                .map(s -> new VendorScoreResponse(stripBrackets(s.companyName()), s.score(), s.comment()))
+                .map(s -> new VendorScoreResponse(stripBrackets(s.companyName()), s.score(),
+                        s.comment() == null ? "" : s.comment()))
                 .toList();
+        String recommendedCompany = stripBrackets(parsed.recommendedCompany());
+        if (recommendedCompany == null || recommendedCompany.isBlank()) {
+            recommendedCompany = contexts.isEmpty() ? "알 수 없음" : contexts.get(0).companyName();
+        }
+        // 모델이 가끔 reasoning을 비워서 응답한다 — NOT NULL 컬럼 저장과 프론트 표시를 위해 방어한다.
+        String reasoning = parsed.reasoning() == null || parsed.reasoning().isBlank()
+                ? "(모델이 근거를 생성하지 않았습니다. 점수만 참고하세요.)"
+                : parsed.reasoning();
+
+        persistLog(eventId, course.title(), recommendedCompany, reasoning, scores);
 
         return new VendorComparisonResponse(eventId, course.title(), true,
-                stripBrackets(parsed.recommendedCompany()), parsed.reasoning(), scores, ollamaClient.model());
+                recommendedCompany, reasoning, scores, ollamaClient.model());
+    }
+
+    /** 호출할 때마다 결과가 휘발되지 않도록 knowledge_vendor_comparison_log에 남긴다. */
+    private void persistLog(long eventId, String eventName, String recommendedCompany, String reasoning,
+                             List<VendorScoreResponse> scores) {
+        try {
+            String scoresJson = objectMapper.writeValueAsString(scores);
+            logRepository.save(new KnowledgeVendorComparisonLogEntity(eventId, eventName, recommendedCompany,
+                    reasoning, scoresJson, ollamaClient.model(), Instant.now()));
+        } catch (Exception e) {
+            // 저장 실패는 응답 자체를 막을 이유가 아니다 — 로그만 남기고 사용자에게는 정상 결과를 돌려준다.
+            log.warn("AI 업체 비교 로그 저장 실패 (eventId={}): {}", eventId, e.toString());
+        }
+    }
+
+    public List<VendorComparisonHistoryItem> history(long eventId) {
+        return logRepository.findByEventIdOrderByCreatedAtDesc(eventId).stream()
+                .map(this::toHistoryItem)
+                .toList();
+    }
+
+    private VendorComparisonHistoryItem toHistoryItem(KnowledgeVendorComparisonLogEntity entity) {
+        List<VendorScoreResponse> scores;
+        try {
+            scores = objectMapper.readValue(entity.getScoresJson(), new TypeReference<List<VendorScoreResponse>>() {});
+        } catch (Exception e) {
+            scores = List.of();
+        }
+        return new VendorComparisonHistoryItem(entity.getEventId(), entity.getEventName(),
+                entity.getRecommendedCompany(), entity.getReasoning(), scores, entity.getModel(),
+                entity.getCreatedAt());
     }
 
     /** 프롬프트에서 [업체명] 표기를 쓰다 보니 모델이 대괄호째로 따라 적는 경우가 있어 후처리로 걷어낸다. */

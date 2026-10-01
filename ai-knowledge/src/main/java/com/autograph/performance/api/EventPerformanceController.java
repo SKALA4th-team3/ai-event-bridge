@@ -6,6 +6,8 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/events/{eventId}")
 public class EventPerformanceController {
@@ -32,5 +34,11 @@ public class EventPerformanceController {
     @GetMapping("/vendor-comparison")
     public VendorComparisonResponse compareVendors(@PathVariable long eventId) {
         return agentService.compare(eventId);
+    }
+
+    /** 이 공고에 대해 과거에 호출했던 AI 업체 비교 결과들(최신순). */
+    @GetMapping("/vendor-comparison/history")
+    public List<VendorComparisonHistoryItem> vendorComparisonHistory(@PathVariable long eventId) {
+        return agentService.history(eventId);
     }
 }

@@ -1,6 +1,6 @@
 <script setup>
 import { computed, onMounted, ref, watch } from 'vue'
-import { compareVendors, createBid, getEventPerformance } from '../api/eventPerformanceApi'
+import { compareVendors, createBid, getEventPerformance, getVendorComparisonHistory } from '../api/eventPerformanceApi'
 import UnifiedPerformanceChart from './charts/UnifiedPerformanceChart.vue'
 import BidMetricChart from './charts/BidMetricChart.vue'
 import BidForm from './BidForm.vue'
@@ -9,14 +9,18 @@ import { formatMoney } from '../utils/formatMoney'
 const props = defineProps({ eventId: { type: [String, Number], required: true } })
 const data = ref(null), loading = ref(true), error = ref(''), submitting = ref(false), success = ref('')
 const agentResult = ref(null), agentLoading = ref(false), agentError = ref('')
+const agentHistory = ref([])
 const money = value => formatMoney(value)
 const people = value => `${Math.round(Number(value)).toLocaleString('ko-KR')}명`
 const visitorTrend = computed(() => data.value?.visitorRegression.trend.map(point => point.value) ?? [])
 const costTrend = computed(() => data.value?.costRegression.trend.map(point => point.value) ?? [])
 const profitTrend = computed(() => data.value?.netProfitRegression.trend.map(point => point.value) ?? [])
 async function load() {
-  loading.value=true; error.value=''; agentResult.value=null; agentError.value=''
-  try { data.value=await getEventPerformance(props.eventId) }
+  loading.value=true; error.value=''; agentResult.value=null; agentError.value=''; agentHistory.value=[]
+  try {
+    data.value=await getEventPerformance(props.eventId)
+    if (data.value?.linkedToRealCourse) agentHistory.value=await getVendorComparisonHistory(props.eventId)
+  }
   catch (e) { error.value=e.message }
   finally { loading.value=false }
 }
@@ -28,7 +32,10 @@ async function submitBid(payload, reset) {
 }
 async function runAgent() {
   agentLoading.value=true; agentError.value=''; agentResult.value=null
-  try { agentResult.value=await compareVendors(props.eventId) }
+  try {
+    agentResult.value=await compareVendors(props.eventId)
+    agentHistory.value=await getVendorComparisonHistory(props.eventId)
+  }
   catch (e) { agentError.value=e.message }
   finally { agentLoading.value=false }
 }
@@ -83,6 +90,18 @@ watch(() => props.eventId, load)
               </li>
             </ul>
             <small>model: {{ agentResult.model }}</small>
+          </div>
+
+          <div v-if="agentHistory.length" class="agent-history">
+            <h4>지난 비교 이력 ({{ agentHistory.length }}건)</h4>
+            <p class="agent-history-note">AI 호출 결과는 매번 DB에 저장되어, 같은 공고를 다시 열어도 과거 추천을 다시 볼 수 있습니다.</p>
+            <details v-for="(h, i) in agentHistory" :key="i">
+              <summary>{{ new Date(h.createdAt).toLocaleString('ko-KR') }} — 추천: {{ h.recommendedCompany }}</summary>
+              <p class="agent-reasoning">{{ h.reasoning }}</p>
+              <ul class="agent-scores">
+                <li v-for="s in h.scores" :key="s.companyName"><strong>{{ s.companyName }}</strong> — {{ s.score }}점 <span>{{ s.comment }}</span></li>
+              </ul>
+            </details>
           </div>
         </article>
       </template>
